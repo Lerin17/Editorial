@@ -6,7 +6,9 @@ import {
   useEffect,
   useMemo,
   useState,
+  type Dispatch,
   type ReactNode,
+  type SetStateAction,
 } from "react";
 import { usePathname } from "next/navigation";
 
@@ -30,6 +32,9 @@ export type MousePosition = {
 export type UtilityContextValue = {
   screenSize: ScreenSize;
   mousePosition: MousePosition;
+  currentSection: string | null;
+  isGalleryDisplayScreenActive: boolean;
+  setIsGalleryDisplayScreenActive: Dispatch<SetStateAction<boolean>>;
   nextRoute: string | null;
   getNextRoute: (currentPath: string, routes: string[]) => string | null;
 };
@@ -99,6 +104,9 @@ export function UtilityProvider({
     x: 0,
     y: 0,
   });
+  const [currentSection, setCurrentSection] = useState<string | null>(null);
+  const [isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive] =
+    useState(true);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -110,10 +118,27 @@ export function UtilityProvider({
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({
+      const nextMousePosition = {
         x: event.clientX,
         y: event.clientY,
+      };
+
+      setMousePosition(nextMousePosition);
+
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>("section[data-section]"),
+      );
+
+      const pointerY = window.scrollY + event.clientY;
+      const activeSection = sections.find((element) => {
+        const rect = element.getBoundingClientRect();
+        const top = window.scrollY + rect.top;
+        const bottom = window.scrollY + rect.bottom;
+
+        return pointerY >= top && pointerY <= bottom;
       });
+
+      setCurrentSection(activeSection?.dataset.section ?? null);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -129,10 +154,19 @@ export function UtilityProvider({
     () => ({
       screenSize,
       mousePosition,
+      currentSection,
+      isGalleryDisplayScreenActive,
+      setIsGalleryDisplayScreenActive,
       nextRoute,
       getNextRoute,
     }),
-    [mousePosition, nextRoute, screenSize],
+    [
+      currentSection,
+      isGalleryDisplayScreenActive,
+      mousePosition,
+      nextRoute,
+      screenSize,
+    ],
   );
 
   return (

@@ -2,7 +2,7 @@
 
 import React from "react";
 // import BufferAnimation from "../LottieFiles/Bufferloader";
-import DisplayScreen from "./DisplayScreen";
+import DisplayScreen2 from "./DisplayScreen2";
 import Masonry from "react-masonry-css";
 import Image from "next/image";
 import { motion, useMotionValue, useSpring } from "framer-motion";
@@ -26,33 +26,37 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 const breakpointColumnsObj = {
-  default: 4,
+  default: 3,
   1100: 3,
   700: 2,
   500: 1,
 };
 
 const CH6_page = () => {
-  const [isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive] =
-    React.useState<boolean>(true);
+  const { isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive } =
+    useUtilityContext();
 
   return (
     <div
       // onMouseMove={(e) => handleMove}
-      className="overflow-y-hidden h-screen cursor-none border bg-white"
+      className={`${isGalleryDisplayScreenActive ? "overflow-y-hidden " : "px-20"} h-screen cursor-none border bg-white`}
     >
-      {/* {!isGalleryDisplayScreenActive && <div>Gallery</div>} */}
+      {!isGalleryDisplayScreenActive && (
+        <div className="h-10 border-b text-black px-2 mb-3 mt-4">Gallery</div>
+      )}
 
-      <div className="flex items-center justify-center h-full bg-zinc-100 border-b text-black font-sans text-lg font-semibold">
+      <div
+        className={` ${isGalleryDisplayScreenActive ? "flex items-center justify-center h-full bg-zinc-100 border-b text-black font-sans text-lg font-semibold" : ""}`}
+      >
         {isGalleryDisplayScreenActive ? (
-          <DisplayScreen
+          <DisplayScreen2
             isGalleryDisplayScreenActive={isGalleryDisplayScreenActive}
             setIsGalleryDisplayScreenActive={setIsGalleryDisplayScreenActive}
           />
         ) : (
           <Masonry
             breakpointCols={breakpointColumnsObj}
-            className="flex gap-4 px-10 mt-10"
+            className="flex gap-4 px-10 border pt-10"
             columnClassName="flex flex-col gap-4"
           >
             {[
