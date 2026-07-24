@@ -9,7 +9,7 @@ import CH4FloorPlanMenuToggle from "./CH4_FloorPlanMenuToggle";
 import CH4Menu_page from "./Menu/CH4_Menu_page";
 
 const CH4_page: React.FC = () => {
-  const { screenSize } = useUtilityContext();
+  const { screenSize, currentSection } = useUtilityContext();
   const { isFloorPlanMenuOpen, setIsFloorPlanMenuOpen } =
     useCH4FloorPlanContext();
   const {
@@ -26,13 +26,14 @@ const CH4_page: React.FC = () => {
   const frameHeight = "100vh";
   const statusText = `${width}×${height} • ${screenSizeRatio.toFixed(2)} • ${approximateScreenSizeRatio} • ${isSmall ? "small" : isMedium ? "medium" : "large"}`;
   const vidSrc = "/vid/WUMBA ANIMATION_MIN.mp4";
+
   return (
     <div
       // className="bg-white "
       style={{ minHeight: "100vh", backgroundColor: "#552828" }}
     >
       <div className="absolute z-10 left-[65px] top-[95px]">
-        <CH4FloorPlanMenuToggle />
+        {currentSection === "CH4" && <CH4FloorPlanMenuToggle />}
       </div>
 
       {/* <CH4Menu_page /> */}

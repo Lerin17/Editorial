@@ -34,90 +34,92 @@ export default function RootLayout({
         <DataProvider>
           <UtilityProvider routes={["/", "/home"]}>
             <CH4FloorPlanProvider>
-              <div
-                style={
-                  {
-                    // width: "20px",
-                    // height: "70px",
+              {false && (
+                <div
+                  style={
+                    {
+                      // width: "20px",
+                      // height: "70px",
+                    }
                   }
-                }
-                className="absolute flex  flex-col justify-center top-[65px] left-[65px] z-10 "
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="47"
-                  height="47"
-                  viewBox="0 0 64 62"
+                  className="absolute flex  flex-col justify-center top-[65px] left-[65px] z-10 "
                 >
-                  <rect
-                    x="0"
-                    y="0"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#979797"
-                    opacity="1"
-                  />
-                  <rect
-                    x="0"
-                    y="10"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#d9d9d9"
-                    opacity="1"
-                  />
-                  <rect
-                    x="0"
-                    y="20"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#d9d9d9"
-                    opacity="0.75"
-                  />
-                  <rect
-                    x="0"
-                    y="30"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#d9d9d9"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="0"
-                    y="40"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#d9d9d9"
-                    opacity="0.25"
-                  />
-                  <rect
-                    x="0"
-                    y="50"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#d9d9d9"
-                    opacity="0.1"
-                  />
-                  <rect
-                    x="0"
-                    y="60"
-                    width="64"
-                    height="6"
-                    rx="3"
-                    fill="#d9d9d9"
-                    opacity="0.02"
-                  />
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="47"
+                    height="47"
+                    viewBox="0 0 64 62"
+                  >
+                    <rect
+                      x="0"
+                      y="0"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#979797"
+                      opacity="1"
+                    />
+                    <rect
+                      x="0"
+                      y="10"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#d9d9d9"
+                      opacity="1"
+                    />
+                    <rect
+                      x="0"
+                      y="20"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#d9d9d9"
+                      opacity="0.75"
+                    />
+                    <rect
+                      x="0"
+                      y="30"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#d9d9d9"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="0"
+                      y="40"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#d9d9d9"
+                      opacity="0.25"
+                    />
+                    <rect
+                      x="0"
+                      y="50"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#d9d9d9"
+                      opacity="0.1"
+                    />
+                    <rect
+                      x="0"
+                      y="60"
+                      width="64"
+                      height="6"
+                      rx="3"
+                      fill="#d9d9d9"
+                      opacity="0.02"
+                    />
+                  </svg>
 
-                {/* <div className="absolute mt-16 z-10">
+                  {/* <div className="absolute mt-16 z-10">
                 <CH4FloorPlanMenuToggle />
               </div> */}
-              </div>
+                </div>
+              )}
 
               {children}
             </CH4FloorPlanProvider>

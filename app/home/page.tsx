@@ -26,10 +26,7 @@ export default function HomePage() {
 
         {isGalleryDisplayScreenActive && (
           <>
-            <section
-              data-section="CH1"
-              className="h-screen snap-start bg-green-400"
-            >
+            <section data-section="CH1" className="h-screen snap-start ">
               <CH1_page />
             </section>
 

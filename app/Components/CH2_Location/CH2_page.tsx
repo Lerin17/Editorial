@@ -114,7 +114,7 @@ const CH2_page: React.FC = () => {
   // }, [zoomTypeActive]);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden ">
+    <div className="relative min-h-screen w-full overflow-hidden bg-white">
       {videoSrc ? (
         <video
           className="transition-all"

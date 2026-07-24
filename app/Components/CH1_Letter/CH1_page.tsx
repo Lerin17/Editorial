@@ -2,61 +2,26 @@
 import Svg from "../../import/SvgText";
 import React, { useState } from "react";
 import CH1_Stacker from "./CH1_Stacker";
+import CH1_Loader from "./CH1_Loader";
 export default function CH1_page({ children }: { children?: React.ReactNode }) {
   const [showAlternateText, setShowAlternateText] = useState(false);
 
-  const [tryText, setTryText] = useState(true);
+  const [tryText, setTryText] = useState(0);
+
+  React.useEffect(() => {
+    if (tryText < 100) {
+      setTimeout(() => {
+        setTryText((prev) => prev + 1);
+      }, 100);
+    }
+  }, [tryText]);
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center ${tryText ? "" : "p-8"} box-border bg-white`}
+      className={`min-h-screen flex items-center justify-center ${tryText === 100 ? "" : "p-8 bg-black"} box-border `}
     >
-      {tryText ? (
-        <CH1_Stacker />
-      ) : (
-        <div className=" w-full flex flex-col gap-4 font-serif text-base leading-7 text-blue-700">
-          {/* <button
-          type="button"
-          onClick={() => setShowAlternateText((prev) => !prev)}
-          className="self-center rounded border border-blue-700 px-4 py-2 text-sm uppercase tracking-wide text-blue-700 transition hover:bg-blue-700 hover:text-white"
-        >
-          {showAlternateText ? "Show Original Text" : "Show Alternate Text"}
-        </button> */}
-
-          {children || (
-            <>
-              {!showAlternateText ? (
-                <div className="text-center">
-                  <p className="text-5xl sm:text-6xl lg:text-8xl leading-none">
-                    The Vale Wumba
-                  </p>
-                  {/* <p className="mt-6 text-2xl sm:text-3xl lg:text-4xl leading-relaxed">
-                  This version highlights a different perspective on the same
-                  development, focusing on the community experience and future
-                  lifestyle opportunities for residents.
-                </p> */}
-                </div>
-              ) : (
-                <>
-                  <p>Dear Reader,</p>
-                  <p>
-                    Wumba Development is a thoughtfully planned residential
-                    community in Wumba District, Cadastral Zone C10, Abuja,
-                    designed to offer modern family living within a secure and
-                    well-organized environment. Set across approximately 7.93
-                    hectares, the estate brings together a diverse mix of
-                    terrace houses and duplexes, complemented by recreational
-                    spaces, retail facilities, and supporting infrastructure.
-                    The master plan balances housing, amenities, and open spaces
-                    to create a vibrant neighborhood where residents can live,
-                    connect, and thrive.
-                  </p>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      )}
+      {tryText === 100 ? <CH1_Loader /> : <CH1_Stacker />}
+      {/* <div className="text-black">{tryText}</div> */}
     </div>
   );
 }

@@ -24,6 +24,12 @@
   font-display: swap;
 }
 
+.h1 {
+  background-image: url('../public/img/4a4bc1bada47edc2f47714973becc63e.jpg');
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: content-box;
+}
+
 @font-face {
   font-family: "Archivo";
   src: url("/fonts/Archivo/Archivo-MediumItalic.ttf") format("truetype");
