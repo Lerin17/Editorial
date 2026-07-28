@@ -89,10 +89,10 @@ const CH1_Stacker = () => {
         where the SVG path/text has solid pixels. Everything else reveals 
         the white background assigned to the parent container.
       */}
-
+      {/* 
       <div className="z-10 h-full w-full absolute">
         <CH1_Title />
-      </div>
+      </div> */}
 
       {/* <div className="flex items-center justify-center h1">
         <div className="text-5xl text-black ">THE VALE WUMBA</div>
@@ -102,7 +102,7 @@ const CH1_Stacker = () => {
         <img
           src="https://res.cloudinary.com/dxjys4qpi/image/upload/v1757757697/Lerin%27s%20Portfolio/Client%204%20%28Apo%20Drive%29/MIN/LIGHT_1_lo7lte_tbthzk.avif"
           alt="Revealed Portfolio Content"
-          className="h-full w-full object-cover grayscale"
+          className="h-full w-full object-cover"
         />
       </div>
 

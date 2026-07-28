@@ -24,8 +24,16 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "Creato";
+  src: url("/robin/public/fonts/creato_display/CreatoDisplay-Regular.otf");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 .h1 {
-  background-image: url('../public/img/4a4bc1bada47edc2f47714973becc63e.jpg');
+  background-image: url("../public/img/4a4bc1bada47edc2f47714973becc63e.jpg");
   -webkit-text-fill-color: transparent;
   -webkit-background-clip: content-box;
 }

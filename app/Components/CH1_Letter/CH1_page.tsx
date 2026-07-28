@@ -6,22 +6,22 @@ import CH1_Loader from "./CH1_Loader";
 export default function CH1_page({ children }: { children?: React.ReactNode }) {
   const [showAlternateText, setShowAlternateText] = useState(false);
 
-  const [tryText, setTryText] = useState(0);
+  const [loaderCount, setLoaderCount] = useState<number>(0);
 
   React.useEffect(() => {
-    if (tryText < 100) {
+    if (loaderCount < 100) {
       setTimeout(() => {
-        setTryText((prev) => prev + 1);
-      }, 100);
+        setLoaderCount((prev) => prev + 1);
+      }, 10);
     }
-  }, [tryText]);
+  }, [loaderCount]);
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center ${tryText === 100 ? "" : "p-8 bg-black"} box-border `}
+      className={`min-h-screen flex items-center justify-center ${loaderCount === 100 ? "" : "p-8 bg-black"} box-border `}
     >
-      {tryText === 100 ? <CH1_Loader /> : <CH1_Stacker />}
-      {/* <div className="text-black">{tryText}</div> */}
+      {/* <CH1_Loader /> */}
+      <CH1_Loader loaderCount />
     </div>
   );
 }
