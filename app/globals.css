@@ -1,83 +1,5 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-Regular.ttf") format("truetype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-Italic.ttf") format("truetype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-Medium.ttf") format("truetype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Creato";
-  src: url("/robin/public/fonts/creato_display/CreatoDisplay-Regular.otf");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-.h1 {
-  background-image: url("../public/img/4a4bc1bada47edc2f47714973becc63e.jpg");
-  -webkit-text-fill-color: transparent;
-  -webkit-background-clip: content-box;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-MediumItalic.ttf") format("truetype");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-SemiBold.ttf") format("truetype");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-SemiBoldItalic.ttf") format("truetype");
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-Bold.ttf") format("truetype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Archivo";
-  src: url("/fonts/Archivo/Archivo-BoldItalic.ttf") format("truetype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -88,7 +10,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-archivo: "Archivo", sans-serif;
+  --font-family-inter:
+    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-family-epilogue: "Epilogue", "Inter", system-ui, sans-serif;
+  --font-family-milligram:
+    "MilligramMacro", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    "Roboto Mono", "Courier New", monospace;
+  --font-family-monument: "MonumentSemi", system-ui, sans-serif;
+  --font-family-berumias: "Berumias", system-ui, sans-serif;
+  --font-family-glinka: "Glinka", system-ui, sans-serif;
+  --font-family-diatype: "Diatype", system-ui, sans-serif;
+  --font-family-lovefrom: "LoveFrom Serif", serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -98,8 +31,318 @@
   }
 }
 
+/* Font declarations: fonts are served from the /public/fonts folder. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter/static/Inter-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter/static/Inter-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter/static/Inter-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter/static/Inter-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter/static/Inter-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Epilogue";
+  src: url("/fonts/Epilogue/static/Epilogue-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Epilogue";
+  src: url("/fonts/Epilogue/static/Epilogue-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Epilogue";
+  src: url("/fonts/Epilogue/static/Epilogue-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Epilogue";
+  src: url("/fonts/Epilogue/static/Epilogue-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Epilogue";
+  src: url("/fonts/Epilogue/static/Epilogue-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MilligramMacro";
+  src: url("/fonts/milligram_macro/Milligram-Macro-Regular-trial.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "MonumentSemi";
+  src: url("/fonts/Semi/MonumentGrotesk-Mono.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Berumias";
+  src: url("/fonts/Berumias/Berumias-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Glinka";
+  src: url("/fonts/glinka/Glinka%20Personal%20Use%20Only.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Diatype";
+  src: url("/fonts/Diatype/ABC Diatype.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Archivo";
+  src: url("/fonts/Archivo/Archivo-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Creato";
+  src: url("/fonts/creato_display/CreatoDisplay-Light.otf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Helvetica";
+  src: url("/fonts/Helvetica Neue/HelveticaNeue-Thin.otf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-family-inter);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--font-family-epilogue);
+  color: var(--foreground);
+}
+
+code,
+pre,
+kbd {
+  font-family: var(--font-family-milligram);
+}
+
+/* Font Utility Classes */
+.font-inter {
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+}
+
+.font-epilogue {
+  font-family: "Epilogue", "Inter", system-ui, sans-serif;
+}
+
+.font-milligram {
+  font-family:
+    "MilligramMacro", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    "Roboto Mono", "Courier New", monospace;
+}
+
+.font-monument {
+  font-family: "MonumentSemi", system-ui, sans-serif;
+}
+
+.font-berumias {
+  font-family: "Berumias", system-ui, sans-serif;
+}
+
+.font-glinka {
+  font-family: "Glinka", system-ui, sans-serif;
+}
+
+.font-lovefrom {
+  font-family: "LoveFrom Serif", serif;
+}
+
+.font-diatype {
+  font-family: "Diatype", system-ui, sans-serif;
+}
+
+.font-archivo {
+  font-family: "Archivo", system-ui, sans-serif;
+}
+
+.font-creato {
+  font-family: "Creato", system-ui, sans-serif;
+}
+
+.font-helvetica {
+  font-family: "Helvetica", monospace;
+}
+
+/* Font Weight Classes for Inter */
+.font-inter-light {
+  font-weight: 300;
+}
+.font-inter-normal {
+  font-weight: 400;
+}
+.font-inter-medium {
+  font-weight: 500;
+}
+.font-inter-semibold {
+  font-weight: 600;
+}
+.font-inter-bold {
+  font-weight: 700;
+}
+
+/* Font Weight Classes for Epilogue */
+.font-epilogue-normal {
+  font-weight: 400;
+}
+.font-epilogue-medium {
+  font-weight: 500;
+}
+.font-epilogue-semibold {
+  font-weight: 600;
+}
+.font-epilogue-bold {
+  font-weight: 700;
+}
+.font-epilogue-extrabold {
+  font-weight: 800;
+}
+
+.font-archivo-normal {
+  font-weight: 400;
+}
+.font-archivo-medium {
+  font-weight: 500;
+}
+.font-archivo-semibold {
+  font-weight: 600;
+}
+.font-archivo-bold {
+  font-weight: 700;
+}
+.font-archivo-extrabold {
+  font-weight: 800;
+}
+
+.font-creato-thin {
+  font-weight: 400;
+}
+.font-creato-medium {
+  font-weight: 500;
+}
+.font-creato-semibold {
+  font-weight: 600;
+}
+
+.gradienty {
+  background: #ffffff;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(235, 235, 235, 1) 100%,
+    rgba(235, 235, 235, 1) 100%
+  );
+}
+
+.gradientblue {
+  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#3b679e+0,2b88d9+50,207cca+51,7db9e8+100;Blue+Gloss+%232 */
+  background: linear-gradient(
+    to bottom,
+    #3b679e 0%,
+    #2b88d9 50%,
+    #207cca 51%,
+    #7db9e8 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+}
+
+.gradientblack {
+  /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#aebcbf+0,6e7774+50,0a0e0a+51,0a0809+100;Black+Gloss */
+  background: linear-gradient(
+    to bottom,
+    #aebcbf 0%,
+    #6e7774 50%,
+    #0a0e0a 51%,
+    #0a0809 100%
+  ); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
 }

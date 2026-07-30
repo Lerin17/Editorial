@@ -13,7 +13,7 @@ import CH5_page from "../Components/CH5_IMAX/CH5_page";
 import CH6_page from "../Components/CH6_Gallery/CH6_page";
 
 export default function HomePage() {
-  const { isGalleryDisplayScreenActive } = useUtilityContext();
+  const { isGalleryDisplayScreenActive, currentSection } = useUtilityContext();
 
   return (
     <CH4FloorPlanProvider>

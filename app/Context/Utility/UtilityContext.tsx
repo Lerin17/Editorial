@@ -107,6 +107,7 @@ export function UtilityProvider({
   const [currentSection, setCurrentSection] = useState<string | null>(null);
   const [isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive] =
     useState(true);
+  const [isReveal, setisReveal] = useState();
   const pathname = usePathname();
 
   useEffect(() => {

@@ -126,11 +126,11 @@ const StylizedCursor = () => {
         width: screenSize.width - 300,
       }}
 
-      className="flex  absolute"
+      className="flex  absolute "
     >
       {
         <motion.div
-          className={`${beginTyping.isBeginTyping ? "" : ""} text-3xl font-archivo  w-fit `}
+          className={`${beginTyping.isBeginTyping ? "" : ""} text-3xl font-creato  w-fit `}
         >
           {text.split("").map((char, i) => {
             const delay = (40 + Math.random() * 30) / 1000;
@@ -166,7 +166,7 @@ const StylizedCursor = () => {
       }
 
       {/* cursor */}
-      <motion.div
+      {/* <motion.div
         animate={{ opacity: [1, 1, 0, 0, 1] }}
         transition={{
           duration: 1,
@@ -182,7 +182,7 @@ const StylizedCursor = () => {
         {
           <div className="animate-puls bg-white text-black w-12 h-12 animate-fade flex items-center justify-center text-5xl"></div>
         }
-      </motion.div>
+      </motion.div> */}
 
       {/* cursor */}
     </motion.div>
@@ -265,7 +265,7 @@ const StylizedCursor2 = () => {
     >
       {
         <motion.div
-          className={`${beginTyping.isBeginTyping ? "" : ""} text-3xl font-archivo  w-fit `}
+          className={`${beginTyping.isBeginTyping ? "" : ""} text-3xl font-creato  w-fit `}
         >
           {text.split("").map((char, i) => {
             const delay = (40 + Math.random() * 30) / 1000;
@@ -300,8 +300,7 @@ const StylizedCursor2 = () => {
         </motion.div>
       }
 
-      {/* cursor */}
-      <motion.div
+      {/* <motion.div
         animate={{ opacity: [1, 1, 0, 0, 1] }}
         transition={{
           duration: 1,
@@ -312,14 +311,12 @@ const StylizedCursor2 = () => {
           //   delay: 2,
           // },
         }}
-        className="text:2xl lg:text-4xl  font-inter flex relative "
+        className="text:2xl lg:text-4xl  font-inter flex relative display-none "
       >
         {
           <div className="animate-puls bg-white text-black w-12 h-12 animate-fade flex items-center justify-center text-5xl"></div>
         }
-      </motion.div>
-
-      {/* cursor */}
+      </motion.div> */}
     </motion.div>
   );
 };
@@ -460,7 +457,8 @@ const StylizedCursor3 = () => {
 };
 
 interface ICH1_Loader_props {
-  loaderCount: any;
+  loaderCount: number;
+  number1: any;
 }
 
 const CH1_Loader = (props: ICH1_Loader_props) => {
@@ -471,6 +469,8 @@ const CH1_Loader = (props: ICH1_Loader_props) => {
     isBeginTyping: false,
     isBeginAnimation: false,
   });
+
+  console.log(props.loaderCount, "props.loader");
 
   const [beginDate, setbeginDate] = React.useState(false);
 
@@ -503,22 +503,45 @@ const CH1_Loader = (props: ICH1_Loader_props) => {
   }, [beginTyping.cursor]);
 
   return (
-    <div className="h-screen w-screen relative bg">
+    <div className="h-screen w-screen relative bg-black ">
       {!beginTyping.cursor ? (
         <BlinkingCursor />
       ) : (
         <div>
           <StylizedCursor />
-          {/* <StylizedCursor2 />
-          <StylizedCursor3 /> */}
+          <StylizedCursor2 />
+          {/* <StylizedCursor3 /> */}
         </div>
       )}
 
+      {/* <div>4</div> */}
+
       {/* <StylizedCursor /> */}
-      <div>{props.loaderCount}</div>
-      {props.loaderCount === 100 && (
-        <div className="w-full h-full  flex items-center justify-center">
-          <div>Click to Enter</div>
+      <div className="">{props.loaderCount}</div>
+
+      {props.loaderCount == 100 && (
+        <div
+          onClick={() => {
+            console.log("click to enter");
+          }}
+          className="  flex items-center justify-center text-white w-full h-full"
+        >
+          <div className="flex flex-col items-center ">
+            <div className="display-block">Click to Enter</div>
+
+            <div className="display-block">
+              <svg
+                className="fill-current text-white"
+                width="24"
+                height="24"
+                xmlns="http://www.w3.org/2000/svg"
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+              >
+                <path d="M11 21.883l-6.235-7.527-.765.644 7.521 9 7.479-9-.764-.645-6.236 7.529v-21.884h-1v21.883z" />
+              </svg>
+            </div>
+          </div>
         </div>
       )}
 
