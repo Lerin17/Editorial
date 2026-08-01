@@ -50,21 +50,24 @@ const DisplayScreen2 = ({
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-zinc-100">
-      <motion.div
-        className="fixed top-0 left-0 w-20 h-20 rounded-full bg-black text-white text-center flex items-center justify-center pointer-events-none text-sm font-base z-50"
-        animate={{
-          x: mousePosition.x - 40,
-          y: mousePosition.y - 40,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 500,
-          damping: 35,
-          mass: 0.2,
-        }}
-      >
-        Open Gallery
-      </motion.div>
+      {currentSection === "CH6_Gallery" && (
+        <motion.div
+          className="fixed top-0 left-0 w-20 h-20 rounded-full bg-black text-white text-center flex items-center justify-center pointer-events-none text-sm font-base z-50"
+          animate={{
+            x: mousePosition.x - 40,
+            y: mousePosition.y - 40,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 500,
+            damping: 35,
+            mass: 0.2,
+          }}
+        >
+          Open Gallery
+        </motion.div>
+      )}
+
       <div className="w-9/12 bg-stone-200 h-full">
         <div className="flex flex-col h-full w-full ">
           <div className="text-2xl font-semibold text-black  w-full">05</div>

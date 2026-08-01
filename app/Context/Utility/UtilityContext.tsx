@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type ReactNode,
@@ -99,8 +100,8 @@ export function UtilityProvider({
   children,
   routes = [],
 }: UtilityProviderProps) {
-  const [screenSize, setScreenSize] = useState<ScreenSize>(getScreenSize());
-  const [mousePosition, setMousePosition] = useState<MousePosition>({
+  const screenSizeRef = useRef<ScreenSize>(getScreenSize());
+  const mousePositionRef = useRef<MousePosition>({
     x: 0,
     y: 0,
   });
@@ -111,7 +112,9 @@ export function UtilityProvider({
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleResize = () => setScreenSize(getScreenSize());
+    const handleResize = () => {
+      Object.assign(screenSizeRef.current, getScreenSize());
+    };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -119,12 +122,8 @@ export function UtilityProvider({
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      const nextMousePosition = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-
-      setMousePosition(nextMousePosition);
+      mousePositionRef.current.x = event.clientX;
+      mousePositionRef.current.y = event.clientY;
 
       const sections = Array.from(
         document.querySelectorAll<HTMLElement>("section[data-section]"),
@@ -139,7 +138,10 @@ export function UtilityProvider({
         return pointerY >= top && pointerY <= bottom;
       });
 
-      setCurrentSection(activeSection?.dataset.section ?? null);
+      const nextSection = activeSection?.dataset.section ?? null;
+      setCurrentSection((previousSection) =>
+        previousSection === nextSection ? previousSection : nextSection,
+      );
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -153,21 +155,15 @@ export function UtilityProvider({
 
   const value = useMemo<UtilityContextValue>(
     () => ({
-      screenSize,
-      mousePosition,
+      screenSize: screenSizeRef.current,
+      mousePosition: mousePositionRef.current,
       currentSection,
       isGalleryDisplayScreenActive,
       setIsGalleryDisplayScreenActive,
       nextRoute,
       getNextRoute,
     }),
-    [
-      currentSection,
-      isGalleryDisplayScreenActive,
-      mousePosition,
-      nextRoute,
-      screenSize,
-    ],
+    [currentSection, isGalleryDisplayScreenActive, nextRoute],
   );
 
   return (

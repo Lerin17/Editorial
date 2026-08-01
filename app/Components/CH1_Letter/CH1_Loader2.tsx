@@ -8,6 +8,7 @@ import image5 from "../../../public/img/sliderImages/slider3_render2.png";
 
 import { useUtilityContext } from "../../Context/Utility";
 import { motion } from "framer-motion";
+import Loader from "./Lottie/Loader";
 
 type Slide = {
   id: number;
@@ -46,7 +47,7 @@ type MotionMoverProps = {
 
 const MotionMover = ({ slide, ...props }: MotionMoverProps) => (
   <motion.div
-    className="absolute"
+    className="absolute border bg-gray-200"
     style={{
       // width: frameWidth,
       // // height: frameHeight,
@@ -55,7 +56,7 @@ const MotionMover = ({ slide, ...props }: MotionMoverProps) => (
 
       minWidth: "320px",
       minHeight: "420px",
-      zIndex: slide.z,
+      zIndex: slide.z + 1,
       filter: `blur(${slide.blur}px)`,
     }}
     initial={{
@@ -86,36 +87,39 @@ const MotionMover = ({ slide, ...props }: MotionMoverProps) => (
       alt=""
       width={slide.imageWidth}
       height={slide.imageHeight}
-      className="pointer-events-none select-none"
+      className="pointer-events-none select-none object-contain"
     />
     <div className="text-black">{String(slide.id)}</div>
   </motion.div>
 );
 
 const CH1_Loader2 = () => {
-  const { screenSize, currentSection } = useUtilityContext();
-  const [isImageSequence, setisImageSequence] = React.useState(0);
-  const [showImages, setShowImages] = React.useState(true);
+  const { screenSize, currentSection, mousePosition } = useUtilityContext();
+  const isImageSequenceRef = React.useRef(0);
+  const [renderStage, setRenderStage] = React.useState(0);
   const defaultOpacity = [0, 1, 1, 1, 1, 1, 1];
   const defaultSpeed = [1, 0.7, 0.4, 0.4, 0.8, 1.3];
   const frameWidth = "90%";
   const frameHeight = "100vh";
 
   React.useEffect(() => {
-    if (!showImages) return;
+    if (renderStage >= 2) return;
 
     const timer = window.setInterval(() => {
-      setisImageSequence((prev) => prev + 1);
+      isImageSequenceRef.current += 1;
+
+      if (isImageSequenceRef.current >= 1) {
+        setRenderStage(1);
+      }
+
+      if (isImageSequenceRef.current >= 6) {
+        setRenderStage(2);
+        window.clearInterval(timer);
+      }
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, [showImages]);
-
-  React.useEffect(() => {
-    if (isImageSequence >= 7) {
-      setShowImages(false);
-    }
-  }, [isImageSequence]);
+  }, [renderStage]);
 
   const images: Slide[] = [
     {
@@ -125,16 +129,15 @@ const CH1_Loader2 = () => {
       // layout
       lane: "foreground",
       size: "hero",
-
       // start position
       x: 800,
-      xAnimate: window.innerWidth + 300,
+      xAnimate: window.innerWidth,
       y: -120,
 
       // movement
       opacity: defaultOpacity,
-      speed: [0.5],
-      duration: 7,
+      speed: [0.2],
+      duration: 10,
       delay: 0.5,
 
       // emphasis
@@ -211,65 +214,100 @@ const CH1_Loader2 = () => {
       lane: "foreground",
       size: "small",
       x: 120,
-      y: 250,
+      y: 170,
       xAnimate: "110vw",
       opacity: defaultOpacity,
       speed: defaultSpeed,
       duration: 12,
       delay: 1.7,
-      scale: 0.2,
-      z: 4,
-      blur: 0.2,
+      scale: 0.5,
+      z: 0,
+      blur: 0,
       parallax: 0.7,
       imageWidth: 400,
       imageHeight: 280,
     },
 
-    // {
-    //   id: 5,
-    //   src: image4,
-    //   lane: "mid",
-    //   size: "small",
-    //   x: 70,
-    //   y: -80,
-    //   opacity: defaultOpacity,
-    //   speed: defaultSpeed,
-    //   duration: 3.6,
-    //   delay: 1.6,
-    //   scale: 0.18,
-    //   z: 2,
-    //   blur: 0.4,
-    //   parallax: 0.55,
-    //   imageWidth: 120,
-    //   imageHeight: 160,
-    // },
+    {
+      id: 5,
+      src: image4,
+      lane: "mid",
+      size: "small",
+      x: 70,
+      y: -80,
+      opacity: defaultOpacity,
+      speed: defaultSpeed,
+      duration: 10,
+      delay: 3.6,
+      scale: 1,
+      xAnimate: "110vw",
+      z: 2,
+      blur: 0.4,
+      parallax: 0.55,
+      imageWidth: 320,
+      imageHeight: 420,
+    },
 
-    // {
-    //   id: 6,
-    //   src: image2,
-    //   lane: "background",
-    //   size: "small",
-    //   x: -40,
-    //   y: 60,
-    //   opacity: defaultOpacity,
-    //   speed: defaultSpeed,
-    //   duration: 3.2,
-    //   delay: 2.1,
-    //   scale: 0.16,
-    //   z: 1,
-    //   blur: 0.6,
-    //   parallax: 0.45,
-    //   imageWidth: 110,
-    //   imageHeight: 148,
-    // },
+    {
+      id: 6,
+      src: image2,
+      lane: "background",
+      size: "small",
+      x: -40,
+      y: 60,
+      opacity: defaultOpacity,
+      speed: defaultSpeed,
+      duration: 12,
+      xAnimate: window.innerWidth + 100,
+      delay: 4.1,
+      scale: 1,
+      z: 1,
+      blur: 0.6,
+      parallax: 0.45,
+      imageWidth: 110,
+      imageHeight: 148,
+    },
   ];
 
+  const images1 = images.slice(0, 3);
+  const images2 = images.slice(3);
+  const images3 = images2;
   return (
-    <div className="h-screen w-screen bg-white flex items-center overflow-hidden">
-      <div className="bg-red-400">{String(isImageSequence)}</div>
-      {images.map((item) => (
-        <MotionMover key={item.id} slide={item} />
+    <div className="relative h-screen w-screen bg-white flex items-center overflow-hidden">
+      <motion.div
+        className="fixed top-0 left-0 w-20 h-20 rounded-full text-white text-center flex items-center justify-center pointer-events-none text-sm font-base z-50"
+        animate={{
+          x: mousePosition.x - 40,
+          y: mousePosition.y - 40,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 500,
+          damping: 35,
+          mass: 0.2,
+        }}
+      >
+        <Loader />
+      </motion.div>
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <div className="h-screen w-[390px] max-w-[90vw] bg-blue-100 flex items-center justify-center">
+          Wumba
+        </div>
+      </div>
+
+      <div className="bg-red-400">{String(isImageSequenceRef.current)}</div>
+      {images1.map((item) => (
+        <MotionMover key={`images1-${item.id}`} slide={item} />
       ))}
+      {renderStage >= 1 &&
+        images2.map((item) => (
+          <MotionMover key={`images2-${item.id}`} slide={item} />
+        ))}
+
+      {renderStage >= 2 &&
+        images3.map((item) => (
+          <MotionMover key={`images3-${item.id}`} slide={item} />
+        ))}
 
       {/* <div
         className="relative overflow-hidden  border border-black"
