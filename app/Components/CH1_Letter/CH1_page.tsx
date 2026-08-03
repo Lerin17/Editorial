@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import CH1_Stacker from "./CH1_Stacker";
 import CH1_Loader from "./CH1_Loader";
 import CH1_Loader2 from "./CH1_Loader2";
+import CH1_Herot from "./CH1_Herot";
 export default function CH1_page({ children }: { children?: React.ReactNode }) {
   const [showAlternateText, setShowAlternateText] = useState(false);
 
@@ -29,9 +30,10 @@ export default function CH1_page({ children }: { children?: React.ReactNode }) {
 
   return (
     <div
-      className={`min-h-screen flex items-center justify-center ${loaderCount === 100 ? "" : ""} box-border `}
+      className={`min-h-screen flex items-center justify-center bg-red-300 ${loaderCount === 100 ? "" : ""} box-border `}
     >
-      <CH1_Loader2 />
+      <CH1_Herot />
+      {/* <CH1_Loader2 /> */}
       {/* <CH1_Loader number1={number1} loaderCount={loaderCount} /> */}
     </div>
   );

@@ -30,9 +30,17 @@ export type MousePosition = {
   y: number;
 };
 
+export type CanUserSkipAnimationState = {
+  letUserSkip: boolean;
+  count: number;
+};
+
 export type UtilityContextValue = {
   screenSize: ScreenSize;
   mousePosition: MousePosition;
+  isCanUserSkipAnimation: CanUserSkipAnimationState;
+  isOpeningSequence: boolean;
+  setIsOpeningSequence: Dispatch<SetStateAction<boolean>>;
   currentSection: string | null;
   isGalleryDisplayScreenActive: boolean;
   setIsGalleryDisplayScreenActive: Dispatch<SetStateAction<boolean>>;
@@ -101,10 +109,16 @@ export function UtilityProvider({
   routes = [],
 }: UtilityProviderProps) {
   const screenSizeRef = useRef<ScreenSize>(getScreenSize());
-  const mousePositionRef = useRef<MousePosition>({
+  const [mousePosition, setMousePosition] = useState<MousePosition>({
     x: 0,
     y: 0,
   });
+  const [isCanUserSkipAnimation, setIsCanUserSkipAnimation] =
+    useState<CanUserSkipAnimationState>({
+      letUserSkip: false,
+      count: 0,
+    });
+  const [isOpeningSequence, setIsOpeningSequence] = useState(false);
   const [currentSection, setCurrentSection] = useState<string | null>(null);
   const [isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive] =
     useState(true);
@@ -122,8 +136,10 @@ export function UtilityProvider({
 
   useEffect(() => {
     const handleMouseMove = (event: MouseEvent) => {
-      mousePositionRef.current.x = event.clientX;
-      mousePositionRef.current.y = event.clientY;
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
       const sections = Array.from(
         document.querySelectorAll<HTMLElement>("section[data-section]"),
@@ -148,6 +164,25 @@ export function UtilityProvider({
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setIsCanUserSkipAnimation((previousState) => {
+        if (previousState.letUserSkip) {
+          return previousState;
+        }
+
+        const nextCount = previousState.count + 1;
+
+        return {
+          count: nextCount,
+          letUserSkip: nextCount >= 4,
+        };
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   const nextRoute = useMemo(
     () => getNextRoute(pathname, routes),
     [pathname, routes],
@@ -156,14 +191,24 @@ export function UtilityProvider({
   const value = useMemo<UtilityContextValue>(
     () => ({
       screenSize: screenSizeRef.current,
-      mousePosition: mousePositionRef.current,
+      mousePosition,
+      isCanUserSkipAnimation,
+      isOpeningSequence,
+      setIsOpeningSequence,
       currentSection,
       isGalleryDisplayScreenActive,
       setIsGalleryDisplayScreenActive,
       nextRoute,
       getNextRoute,
     }),
-    [currentSection, isGalleryDisplayScreenActive, nextRoute],
+    [
+      currentSection,
+      isCanUserSkipAnimation,
+      isOpeningSequence,
+      isGalleryDisplayScreenActive,
+      mousePosition,
+      nextRoute,
+    ],
   );
 
   return (
