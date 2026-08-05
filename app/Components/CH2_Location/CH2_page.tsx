@@ -7,6 +7,7 @@ import locationImage3 from "../../../public/img/8°5659.5_N 7°2918.4_E - Google
 import locationImage4 from "../../../public/img/8°5659.5_N 7°2918.4_E - Google Maps 4x-1.png";
 import locationImage5 from "../../../public/img/8°5659.5_N 7°2918.4_E - Google Maps 8x-2.png";
 import Button_sm from "../Utility/Buttons/Button_sm";
+import LoaderCircle from "./Lottie/LottieCircle";
 
 const CH2_page: React.FC = () => {
   const videoSrc = "/vid/Comp_2.mp4";
@@ -117,7 +118,7 @@ const CH2_page: React.FC = () => {
     <div className="relative min-h-screen w-full overflow-hidden bg-white">
       {videoSrc ? (
         <video
-          className="transition-all"
+          className="transition-all absolute"
           ref={videoRef}
           src={videoSrc}
           // autoPlay
@@ -133,18 +134,18 @@ const CH2_page: React.FC = () => {
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
-                  zIndex: 0,
+                  zIndex: 200,
                   objectFit: "cover",
                 }
               : zoomTypeActive === "8x"
                 ? {
                     position: "absolute",
-                    width: "500px",
-                    height: "600px",
+                    width: "200px",
+                    height: "200px",
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    zIndex: 0,
+                    zIndex: 200,
                     objectFit: "cover",
                   }
                 : {
@@ -154,7 +155,7 @@ const CH2_page: React.FC = () => {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    zIndex: 0,
+                    zIndex: 200,
                     objectFit: "cover",
                   }
           }
@@ -170,9 +171,53 @@ const CH2_page: React.FC = () => {
       )}
 
       <div className="relative z-10 flex h-screen flex-col ">
-        <div className="w-full border-b border-blue-300 absolute top-3">x</div>
+        <div className="text-black font-archivo font-light  absolute -top-4 left-3 text-[170px] z-20">
+          ABUJA
+        </div>
 
-        <div className="relative h-full text-black w-full flex justify-center items-center">
+        <div
+          style={{
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+          className="text-black w-fit font-archivo font-light absolute left-3 text-[50px] z-20"
+        >
+          <div className=" items-center gap-2 relative">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              className="fill-current w-10 h-10"
+            >
+              <path d="M24 22h-24l12-20z" />
+            </svg>
+            {/* 
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              className="fill-current w-16 h-16"
+            >
+              <path d="M23.677 18.52c.914 1.523-.183 3.472-1.967 3.472h-19.414c-1.784 0-2.881-1.949-1.967-3.472l9.709-16.18c.891-1.483 3.041-1.48 3.93 0l9.709 16.18z" />
+            </svg> */}
+
+            <div className="text-black font-milligram font-bold font-light absolute top-5 left-[8px]  text-[50px] z-20">
+              N
+            </div>
+          </div>
+        </div>
+
+        <div className="absolute z-0">
+          <LoaderCircle />
+        </div>
+
+        {/* <div className="text-black font-archivo font-light  absolute top-32 left-3 text-[150px] z-20">
+          ABUJA
+        </div> */}
+
+        {/* <div className="relative h-full text-black w-full flex justify-center items-center">
           <div className="w-[90%]  lg:w-[85%]   flex justify-between">
             <div className="text-gray-800 font-archivo ">
               <div>Abuja, Nigeria</div>
@@ -185,7 +230,7 @@ const CH2_page: React.FC = () => {
               <div>9.011 5.001</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="absolute bottom-0 left-0 right-0 mb-6 flex justify-center">
           <div className="flex flex-wrap justify-center gap-4 w-full max-w-md sm:max-w-lg">

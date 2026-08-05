@@ -3,7 +3,27 @@ import { useUtilityContext } from "../../Context/Utility/UtilityContext";
 
 const CH1_Herot = () => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  const { isOpeningSequence } = useUtilityContext();
+  const { isOpeningSequence, isUnloadLoader } = useUtilityContext();
+
+  React.useEffect(() => {
+    if (isUnloadLoader) {
+      const timeout = setTimeout(() => {
+        console.log(
+          "isUnloadLoader changed:",
+          isUnloadLoader,
+          videoRef.current,
+        );
+        videoRef.current?.play().catch((error) => {
+          console.error(
+            "Error attempting to play video:",
+            error,
+            videoRef.current,
+          );
+        });
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [isUnloadLoader]);
 
   return (
     <div>
@@ -14,7 +34,7 @@ const CH1_Herot = () => {
         <video
           ref={videoRef}
           src="/vid/input_1.mp4"
-          autoPlay
+          // autoPlay
           muted
           // loop
           playsInline

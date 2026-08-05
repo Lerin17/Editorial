@@ -46,6 +46,8 @@ export type UtilityContextValue = {
   setIsGalleryDisplayScreenActive: Dispatch<SetStateAction<boolean>>;
   nextRoute: string | null;
   getNextRoute: (currentPath: string, routes: string[]) => string | null;
+  isUnloadLoader: boolean;
+  setIsUnloadLoader: Dispatch<SetStateAction<boolean>>;
 };
 
 type UtilityProviderProps = {
@@ -122,8 +124,18 @@ export function UtilityProvider({
   const [currentSection, setCurrentSection] = useState<string | null>(null);
   const [isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive] =
     useState(true);
+  const [isUnloadLoader, setIsUnloadLoader] = useState(false);
   const [isReveal, setisReveal] = useState();
   const pathname = usePathname();
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (isOpeningSequence) {
+        setIsUnloadLoader(true);
+      }
+    }, 3000);
+    // setIsUnloadLoader(true);
+  }, [isOpeningSequence]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -200,6 +212,8 @@ export function UtilityProvider({
       setIsGalleryDisplayScreenActive,
       nextRoute,
       getNextRoute,
+      isUnloadLoader,
+      setIsUnloadLoader,
     }),
     [
       currentSection,
@@ -208,6 +222,7 @@ export function UtilityProvider({
       isGalleryDisplayScreenActive,
       mousePosition,
       nextRoute,
+      isUnloadLoader,
     ],
   );
 

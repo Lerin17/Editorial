@@ -116,22 +116,6 @@ const CH1_Loader2 = () => {
   const frameWidth = "90%";
   const frameHeight = "100vh";
 
-  // React.useEffect(() => {
-  //   if (isBeginFadeIn) {
-  //     const timeout = setTimeout(() => {
-  //       console.log("isBeginFadeIn changed:", isBeginFadeIn, videoRef.current);
-  //       videoRef.current?.play().catch((error) => {
-  //         console.error(
-  //           "Error attempting to play video:",
-  //           error,
-  //           videoRef.current,
-  //         );
-  //       });
-  //     }, 3000);
-  //     return () => clearTimeout(timeout);
-  //   }
-  // }, [isBeginFadeIn]);
-
   React.useEffect(() => {
     if (isOpeningSequence) {
       setTimeout(() => {
@@ -360,7 +344,14 @@ const CH1_Loader2 = () => {
   const images2 = images.slice(3);
   const afterburnerImages = images2;
   return (
-    <div
+    <motion.div
+      animate={{ opacity: isOpeningSequence ? 0 : 1 }}
+      transition={{
+        duration: 0.5,
+        ease: "easeInOut",
+        delay: isOpeningSequence ? 2 : 0,
+      }}
+
       onClick={() => {
         if (isCanUserSkipAnimation.letUserSkip) {
           console.log("User clicked to skip animation");
@@ -516,7 +507,7 @@ const CH1_Loader2 = () => {
           priority
         />
       </div> */}
-    </div>
+    </motion.div>
   );
 };
 
