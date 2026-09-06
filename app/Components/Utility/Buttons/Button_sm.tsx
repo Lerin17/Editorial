@@ -9,7 +9,7 @@ type ButtonSmProps = {
 const Button_sm: React.FC<ButtonSmProps> = ({ active, execute, label = "Toggle" }) => {
   return (
     <button
-    className='font-archivo'
+    className='font-archivo bg-red-400'
       type="button"
       onClick={() => execute()}
       style={{

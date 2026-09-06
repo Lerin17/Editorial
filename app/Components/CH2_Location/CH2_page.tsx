@@ -12,9 +12,12 @@ import LoaderCircle from "./Lottie/LottieCircle";
 const CH2_page: React.FC = () => {
   const videoSrc = "/vid/Comp_2.mp4";
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
+
   const [zoomTypeActive, setZoomTypeActive] = React.useState<
     "1x" | "4x" | "8x"
-  >("1x");
+  >("4x");
+
+  // const [zoomState, setzoomState] = React.useState<"1x" | "4x" | "8x">("1x");
 
   const selectedImage =
     zoomTypeActive === "1x"
@@ -115,7 +118,7 @@ const CH2_page: React.FC = () => {
   // }, [zoomTypeActive]);
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-white">
+    <div className="relative min-h-screen w-full overflow-hidden  bg-white border-4 border-black">
       {videoSrc ? (
         <video
           className="transition-all absolute"
@@ -129,12 +132,12 @@ const CH2_page: React.FC = () => {
             zoomTypeActive === "4x"
               ? {
                   position: "absolute",
-                  width: "450px",
-                  height: "600px",
+                  width: "550px",
+                  height: "550px",
                   top: "50%",
                   left: "50%",
                   transform: "translate(-50%, -50%)",
-                  zIndex: 200,
+                  zIndex: 30,
                   objectFit: "cover",
                 }
               : zoomTypeActive === "8x"
@@ -145,7 +148,7 @@ const CH2_page: React.FC = () => {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    zIndex: 200,
+                    zIndex: 30,
                     objectFit: "cover",
                   }
                 : {
@@ -155,7 +158,7 @@ const CH2_page: React.FC = () => {
                     top: "50%",
                     left: "50%",
                     transform: "translate(-50%, -50%)",
-                    zIndex: 200,
+                    zIndex: 30,
                     objectFit: "cover",
                   }
           }
@@ -170,17 +173,41 @@ const CH2_page: React.FC = () => {
         />
       )}
 
-      <div className="relative z-10 flex h-screen flex-col ">
-        <div className="text-black font-archivo font-light  absolute -top-4 left-3 text-[170px] z-20">
+      <div className=" flex   flex-col z-[20]">
+        {/* <div className="text-black font-archivo font-light  absolute -top-4 left-3 text-[170px] z-20">
           ABUJA
-        </div>
+        </div> */}
+
+        {zoomTypeActive === "4x" ? (
+          <div className="text-black font-archivo font-light  text-[100px] absolute -top-4 left-3 z-30">
+            WUMBA
+            <div className="text-black font-archivo font-light text-[50px] absolute top-26 left-3 z-30">
+              Apo, Duste
+            </div>
+          </div>
+        ) : zoomTypeActive === "8x" ? (
+          <div className="text-black font-archivo font-light text-[150px] absolute -top-4 left-3 z-20">
+            ABUJA
+          </div>
+        ) : (
+          <div className="text-black font-archivo font-light text-[70px] absolute -top-4 left-3 z-20">
+            ABUJA
+          </div>
+        )}
+
+        {zoomTypeActive === "4x" && (
+          <div className="text-black font-archivo font-light text-[50px] absolute -top-4 right-3 z-30">
+            <div> 7.4913° E </div>
+            <div>9.0722° N</div>
+          </div>
+        )}
 
         <div
           style={{
             left: "50%",
             transform: "translateX(-50%)",
           }}
-          className="text-black w-fit font-archivo font-light absolute left-3 text-[50px] z-20"
+          className="text-black w-fit font-archivo font-light absolute left-3 text-[50px] z-30"
         >
           <div className=" items-center gap-2 relative">
             <svg
@@ -203,13 +230,13 @@ const CH2_page: React.FC = () => {
               <path d="M23.677 18.52c.914 1.523-.183 3.472-1.967 3.472h-19.414c-1.784 0-2.881-1.949-1.967-3.472l9.709-16.18c.891-1.483 3.041-1.48 3.93 0l9.709 16.18z" />
             </svg> */}
 
-            <div className="text-black font-milligram font-bold font-light absolute top-5 left-[8px]  text-[50px] z-20">
+            <div className="text-black font-milligram font-bold font-light absolute top-5 left-[8px]  text-[50px] z-30">
               N
             </div>
           </div>
         </div>
 
-        <div className="absolute z-0">
+        <div className="absolute z-[20]">
           <LoaderCircle />
         </div>
 
@@ -230,10 +257,15 @@ const CH2_page: React.FC = () => {
               <div>9.011 5.001</div>
             </div>
           </div>
-        </div> */}
+        </div> */}\
 
-        <div className="absolute bottom-0 left-0 right-0 mb-6 flex justify-center">
-          <div className="flex flex-wrap justify-center gap-4 w-full max-w-md sm:max-w-lg">
+        <div>eexez
+        </div>
+
+
+        <div className="absolute bottom-0 left-0 right-0 mb-6 flex justify-center z-[230]">
+          
+          <div className="flex flex-wrap justify-center gap-4 w-full max-w-md sm:max-w-lg mt-42 border">
             <Button_sm
               active={true}
               execute={() => {
@@ -289,6 +321,7 @@ const CH2_page: React.FC = () => {
             />
 
             <Button_sm
+       
               active={true}
               execute={() => {
                 if (

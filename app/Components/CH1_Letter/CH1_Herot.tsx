@@ -26,11 +26,11 @@ const CH1_Herot = () => {
   }, [isUnloadLoader]);
 
   return (
-    <div>
+    <div className='h-screen w-screen bg-red-400 flex items-center justify-center'>
       {/* 
       {isOpeningSequence && ()} */}
 
-      <div className=" inset-0 z-[190]">
+      <div className="inset-0 z-[190] h-full w-full">
         <video
           ref={videoRef}
           src="/vid/input_1.mp4"
@@ -39,7 +39,8 @@ const CH1_Herot = () => {
           // loop
           playsInline
           preload="auto"
-          className="w-full h-full object-contain"
+
+          className="h-full w-full object-cover"
         />
         {/* <button
                     onClick={() => {

@@ -25,6 +25,11 @@ export type ScreenSize = {
   isLarge: boolean;
 };
 
+export type ScreenSizeHistory = {
+  previous: ScreenSize;
+  current: ScreenSize;
+};
+
 export type MousePosition = {
   x: number;
   y: number;
@@ -37,11 +42,15 @@ export type CanUserSkipAnimationState = {
 
 export type UtilityContextValue = {
   screenSize: ScreenSize;
+  screenSizeHistory: ScreenSizeHistory;
   mousePosition: MousePosition;
   isCanUserSkipAnimation: CanUserSkipAnimationState;
   isOpeningSequence: boolean;
   setIsOpeningSequence: Dispatch<SetStateAction<boolean>>;
   currentSection: string | null;
+  scrollHeight: number;
+  isScrollLocked: boolean;
+  virtualScrollDistance: number;
   isGalleryDisplayScreenActive: boolean;
   setIsGalleryDisplayScreenActive: Dispatch<SetStateAction<boolean>>;
   nextRoute: string | null;
@@ -110,7 +119,17 @@ export function UtilityProvider({
   children,
   routes = [],
 }: UtilityProviderProps) {
-  const screenSizeRef = useRef<ScreenSize>(getScreenSize());
+  const [screenSizeHistory, setScreenSizeHistory] =
+    useState<ScreenSizeHistory>(() => {
+      const initialScreenSize = getScreenSize();
+
+      return {
+        previous: initialScreenSize,
+        current: initialScreenSize,
+      };
+    });
+  const scrollLockHeight = 50;
+  const scrollUnlockDistance = 200;
   const [mousePosition, setMousePosition] = useState<MousePosition>({
     x: 0,
     y: 0,
@@ -122,11 +141,24 @@ export function UtilityProvider({
     });
   const [isOpeningSequence, setIsOpeningSequence] = useState(false);
   const [currentSection, setCurrentSection] = useState<string | null>(null);
+  const [scrollHeight, setScrollHeight] = useState(0);
+  const [isScrollLocked, setIsScrollLocked] = useState(false);
+  const [virtualScrollDistance, setVirtualScrollDistance] = useState(0);
   const [isGalleryDisplayScreenActive, setIsGalleryDisplayScreenActive] =
     useState(true);
   const [isUnloadLoader, setIsUnloadLoader] = useState(false);
   const [isReveal, setisReveal] = useState();
   const pathname = usePathname();
+  const isScrollLockedRef = useRef(isScrollLocked);
+  const virtualScrollDistanceRef = useRef(virtualScrollDistance);
+
+  useEffect(() => {
+    isScrollLockedRef.current = isScrollLocked;
+  }, [isScrollLocked]);
+
+  useEffect(() => {
+    virtualScrollDistanceRef.current = virtualScrollDistance;
+  }, [virtualScrollDistance]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -139,7 +171,10 @@ export function UtilityProvider({
 
   useEffect(() => {
     const handleResize = () => {
-      Object.assign(screenSizeRef.current, getScreenSize());
+      setScreenSizeHistory((previousHistory) => ({
+        previous: previousHistory.current,
+        current: getScreenSize(),
+      }));
     };
 
     window.addEventListener("resize", handleResize);
@@ -147,23 +182,15 @@ export function UtilityProvider({
   }, []);
 
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-
+    const updateCurrentSection = (anchorY: number) => {
       const sections = Array.from(
         document.querySelectorAll<HTMLElement>("section[data-section]"),
       );
 
-      const pointerY = window.scrollY + event.clientY;
       const activeSection = sections.find((element) => {
         const rect = element.getBoundingClientRect();
-        const top = window.scrollY + rect.top;
-        const bottom = window.scrollY + rect.bottom;
 
-        return pointerY >= top && pointerY <= bottom;
+        return anchorY >= rect.top && anchorY <= rect.bottom;
       });
 
       const nextSection = activeSection?.dataset.section ?? null;
@@ -172,8 +199,118 @@ export function UtilityProvider({
       );
     };
 
+    const scrollContainer = document.querySelector<HTMLElement>(
+      "[data-scroll-container]",
+    );
+
+    const enterScrollLock = () => {
+      isScrollLockedRef.current = true;
+      setIsScrollLocked(true);
+      virtualScrollDistanceRef.current = 0;
+      setVirtualScrollDistance(0);
+
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollLockHeight;
+      }
+
+      setScrollHeight(scrollLockHeight);
+      updateCurrentSection(window.innerHeight / 2);
+    };
+
+    const exitScrollLock = () => {
+      isScrollLockedRef.current = false;
+      setIsScrollLocked(false);
+      virtualScrollDistanceRef.current = 0;
+      setVirtualScrollDistance(0);
+      setScrollHeight(scrollLockHeight + scrollUnlockDistance);
+
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollLockHeight + scrollUnlockDistance;
+      }
+
+      updateCurrentSection(window.innerHeight / 2);
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+      setMousePosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      updateCurrentSection(event.clientY);
+    };
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!isScrollLockedRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const nextVirtualDistance =
+        virtualScrollDistanceRef.current + Math.abs(event.deltaY);
+
+      // if (nextVirtualDistance >= scrollUnlockDistance) {
+      //   exitScrollLock();
+      //   return;
+      // }
+
+      virtualScrollDistanceRef.current = nextVirtualDistance;
+
+      if (nextVirtualDistance <= scrollUnlockDistance) {
+        setVirtualScrollDistance(nextVirtualDistance);
+      }
+
+      setScrollHeight(scrollLockHeight + nextVirtualDistance);
+    };
+
+    const handleScroll = () => {
+      const nextScrollHeight = scrollContainer?.scrollTop ?? window.scrollY;
+
+      // if( scrollContainer?.scrollTop ?? window.scrollY >= scrollUnlockDistance) {
+
+      // }else{
+      // const nextScrollHeight = scrollContainer?.scrollTop ?? window.scrollY;
+      // }
+
+      console.log(
+        nextScrollHeight,
+        "nextScrollHeight...maybe a better name than this",
+      );
+
+      // TRIGGER SCROLL LOCK TO BEGIN CH2 and CH1 FADE OUT SHENANIGANS
+      if (!isScrollLockedRef.current && nextScrollHeight >= scrollLockHeight) {
+        // enterScrollLock();
+        return;
+      } // TRIGGER SCROLL LOCK TO BEGIN CH2 and CH1 FADE OUT SHENANIGANS
+
+      // if (isScrollLockedRef.current) {
+      //   setScrollHeight(scrollLockHeight + virtualScrollDistanceRef.current);
+      //   if (scrollContainer) {
+      //     scrollContainer.scrollTop = scrollLockHeight;
+      //   }
+      //   return;
+      // }
+
+      setScrollHeight(nextScrollHeight);
+      updateCurrentSection(window.innerHeight / 2);
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    scrollContainer?.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+    scrollContainer?.addEventListener("wheel", handleWheel, {
+      passive: false,
+    });
+
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      scrollContainer?.removeEventListener("scroll", handleScroll);
+      scrollContainer?.removeEventListener("wheel", handleWheel);
+    };
   }, []);
 
   useEffect(() => {
@@ -202,12 +339,16 @@ export function UtilityProvider({
 
   const value = useMemo<UtilityContextValue>(
     () => ({
-      screenSize: screenSizeRef.current,
+      screenSize: screenSizeHistory.current,
+      screenSizeHistory,
       mousePosition,
       isCanUserSkipAnimation,
       isOpeningSequence,
       setIsOpeningSequence,
       currentSection,
+      scrollHeight,
+      isScrollLocked,
+      virtualScrollDistance,
       isGalleryDisplayScreenActive,
       setIsGalleryDisplayScreenActive,
       nextRoute,
@@ -219,10 +360,14 @@ export function UtilityProvider({
       currentSection,
       isCanUserSkipAnimation,
       isOpeningSequence,
+      isScrollLocked,
+      scrollHeight,
+      virtualScrollDistance,
       isGalleryDisplayScreenActive,
       mousePosition,
       nextRoute,
       isUnloadLoader,
+      screenSizeHistory,
     ],
   );
 

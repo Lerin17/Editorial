@@ -72,29 +72,31 @@ export default function FoilMaterial({
 }: FoilMaterialProps) {
   const ref = useRef<THREE.ShaderMaterial>(null);
 
-  const uniforms = useMemo(
-    () => ({
-      uTime: { value: 0 },
-      uMouse: { value: new THREE.Vector2() },
-    }),
-    [],
-  );
+  // const uniforms = useMemo(
+  //   () => ({
+  //     uTime: { value: 0 },
+  //     uMouse: { value: new THREE.Vector2() },
+  //   }),
+  //   [],
+  // );
 
-  useFrame(({ clock, pointer }) => {
-    if (!ref.current) return;
+  // useFrame(({ clock, pointer }) => {
+  //   if (!ref.current) return;
 
-    ref.current.uniforms.uTime.value = clock.elapsedTime;
+  //   ref.current.uniforms.uTime.value = clock.elapsedTime;
 
-    ref.current.uniforms.uMouse.value.set(pointer.x, pointer.y);
-  });
+  //   ref.current.uniforms.uMouse.value.set(pointer.x, pointer.y);
+  // });
 
-  return (
-    <shaderMaterial
-      ref={ref}
-      vertexShader={vertexShader}
-      fragmentShader={fragmentShader}
-      uniforms={uniforms}
-      side={side}
-    />
-  );
+  // return (
+  //   <shaderMaterial
+  //     ref={ref}
+  //     vertexShader={vertexShader}
+  //     fragmentShader={fragmentShader}
+  //     uniforms={uniforms}
+  //     side={side}
+  //   />
+  // );
+
+  return <div>ex</div>;
 }

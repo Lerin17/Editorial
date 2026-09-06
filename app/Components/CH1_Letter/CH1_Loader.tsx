@@ -519,6 +519,7 @@ const CH1_Loader = (props: ICH1_Loader_props) => {
       {/* <StylizedCursor /> */}
       <div className="">{props.loaderCount}</div>
 
+{/* COUNTER CURSOR */}
       {props.loaderCount == 100 && (
         <div
           onClick={() => {
@@ -544,7 +545,7 @@ const CH1_Loader = (props: ICH1_Loader_props) => {
           </div>
         </div>
       )}
-
+{/* COUNTER CURSOR */}
       {/* <div className="w-full h-full flex justify-center items-center">
         <div className="flex  w-5/12  text-white ">
           <div>

@@ -9,9 +9,11 @@ import Hero from "./3D/TextContainer";
 import { useUtilityContext } from "../../Context/Utility";
 import { motion } from "framer-motion";
 import Loader from "./Lottie/Loader";
+import { get } from "http";
 
 type Slide = {
   id: number;
+  type?: SlideType;
   src: any;
 
   lane: "foreground" | "mid" | "background";
@@ -36,6 +38,17 @@ type Slide = {
   imageWidth: number;
   imageHeight: number;
 };
+
+type SlideType = "images1" | "images2" | "afterburner";
+type ScreenSizeCategory = "isSmall" | "isMedium" | "isLarge";
+
+type AnimationViewport = {
+  screenSizeCategory: ScreenSizeCategory;
+  horizontalMoveValue: number;
+};
+
+const getScreenSizeCategory = (width: number): ScreenSizeCategory =>
+  width < 768 ? "isSmall" : width < 1280 ? "isMedium" : "isLarge";
 
 interface SlideProps {
   slide: Slide;
@@ -92,13 +105,17 @@ const MotionMover = ({ slide, ...props }: MotionMoverProps) => (
       height={slide.imageHeight}
       className="pointer-events-none select-none object-contain"
     />
-    <div className="text-black">{String(slide.id)}</div>
+    <div className="text-black flex">
+      {`${slide.type ?? "unassigned"}-${slide.id}`}
+      <span className="ml-2">{slide.type}</span>
+    </div>
   </motion.div>
 );
 
 const CH1_Loader2 = () => {
   const {
     screenSize,
+    screenSizeHistory,
     currentSection,
     mousePosition,
     isCanUserSkipAnimation,
@@ -110,6 +127,12 @@ const CH1_Loader2 = () => {
   const [renderStage, setRenderStage] = React.useState(0);
   const [isAccelerateImages, setIsAccelerateImages] = React.useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = React.useState(false);
+  const [animationViewport, setAnimationViewport] =
+    React.useState<AnimationViewport>(() => ({
+      screenSizeCategory: getScreenSizeCategory(screenSizeHistory.current.width),
+      horizontalMoveValue: screenSizeHistory.current.width + 400,
+    }));
+
 
   const defaultOpacity = [0, 1, 1, 1, 1, 1, 1];
   const [defaultSpeed, setDefaultSpeed] = React.useState(BASE_SPEED);
@@ -127,7 +150,7 @@ const CH1_Loader2 = () => {
   React.useEffect(() => {
     if (renderStage >= 2) return;
 
-    const timer = window.setInterval(() => {
+    const timer = window?.setInterval(() => {
       let renderStage1Timeout = 1;
 
       let renderStage2Timeout = 6;
@@ -176,13 +199,86 @@ const CH1_Loader2 = () => {
 
   console.log(defaultSpeed, "defaultSpeed");
 
-  // React.useEffect(() => {
-  //   const timer = window.setTimeout(() => {
+  React.useEffect(() => {
+    const currentWidth = screenSizeHistory.current.width;
+    const currentScreenSizeCategory = getScreenSizeCategory(currentWidth);
 
-  //   }, 10000);
+    if (
+      animationViewport.screenSizeCategory === currentScreenSizeCategory
+    ) {
+      return;
+    }
 
-  //   return () => window.clearTimeout(timer);
-  // }, []);
+    if (!animationViewport.horizontalMoveValue) {
+      setAnimationViewport({
+        screenSizeCategory: currentScreenSizeCategory,
+        horizontalMoveValue: currentWidth + 400,
+      });
+      return;
+    }
+    // setAnimationViewport({
+    //   screenSizeCategory: currentScreenSizeCategory,
+    //   horizontalMoveValue: currentWidth + 400,
+    // });
+
+  }, []);
+
+
+  
+  React.useEffect(() => {
+    const currentWidth = screenSizeHistory.current.width;
+    const currentScreenSizeCategory = getScreenSizeCategory(currentWidth);
+
+    if (
+      animationViewport.screenSizeCategory === currentScreenSizeCategory
+    ) {
+      return;
+    }
+
+
+          // ONLY RUN WHEN ANIMATION IS ONGOING
+
+    if (animationViewport.horizontalMoveValue) {
+      const prevScreenSizeCategory = animationViewport.screenSizeCategory;
+      const red = ['isSmall', 'isMedium', 'isLarge'];
+
+      const blue = red.map((item, id) => ({
+        title: item,
+        value: id,
+      }))
+
+
+      const compareValues = (value1:string, value2:string) => {
+        const index1 = blue.findIndex(item => item.title === value1);
+        const index2 = blue.findIndex(item => item.title === value2);
+          console.log(value1, value2, "INDEDD");
+        console.log(index1, index2, "INDEDD");
+      
+        if(index1 > index2){
+          return true
+        }else if(index1 < index2){
+          return false
+        }else {
+          return true;
+        }
+      }
+      
+      compareValues(prevScreenSizeCategory, currentScreenSizeCategory)
+
+      console.log(blue, 'value')
+      if(!compareValues(prevScreenSizeCategory, currentScreenSizeCategory)) {
+              setAnimationViewport({
+        screenSizeCategory: currentScreenSizeCategory,
+        horizontalMoveValue: currentWidth + 400,
+      });
+      }
+
+      return;
+    }
+
+
+  }, [screenSizeHistory]);
+
 
   const images: Slide[] = [
     {
@@ -195,15 +291,15 @@ const CH1_Loader2 = () => {
       // start position
       x: 800,
       xAnimate: isAccelerateImages
-        ? window.screen.width + 400
-        : window.innerWidth,
+        ? screenSizeHistory.current.width + 400
+        : animationViewport.horizontalMoveValue,
       y: -120,
 
       // movement
       opacity: defaultOpacity,
       speed: defaultSpeed,
       duration: isAccelerateImages ? 1 : 10,
-      delay: isAccelerateImages ? 0.05 : 0.5,
+      delay: isAccelerateImages ? 0 : 0.5,
 
       // emphasis
       scale: 0.6,
@@ -228,8 +324,8 @@ const CH1_Loader2 = () => {
 
       x: 100,
       xAnimate: isAccelerateImages
-        ? window.screen.width + 400
-        : window.innerWidth + 300,
+        ? screenSizeHistory.current.width + 400
+        : animationViewport.horizontalMoveValue,
       y: -200,
 
       opacity: defaultOpacity,
@@ -258,8 +354,8 @@ const CH1_Loader2 = () => {
       x: 80,
       y: 40,
       xAnimate: isAccelerateImages
-        ? window.screen.width + 400
-        : window.innerWidth + 300,
+        ? animationViewport.horizontalMoveValue + 400
+        : animationViewport.horizontalMoveValue,
 
       opacity: [0, 1, 1, 1, 1, 1, 1],
       speed: defaultSpeed,
@@ -284,7 +380,9 @@ const CH1_Loader2 = () => {
       size: "small",
       x: 120,
       y: 170,
-      xAnimate: isAccelerateImages ? window.screen.width + 400 : "110vw",
+      xAnimate: isAccelerateImages
+        ? animationViewport.horizontalMoveValue + 400
+        : animationViewport.horizontalMoveValue,
       opacity: defaultOpacity,
       speed: defaultSpeed,
       duration: isAccelerateImages ? 1 : 12,
@@ -309,7 +407,9 @@ const CH1_Loader2 = () => {
       duration: isAccelerateImages ? 1 : 10,
       delay: isAccelerateImages ? 0.36 : 3.6,
       scale: 1,
-      xAnimate: isAccelerateImages ? window.screen.width + 400 : "110vw",
+      xAnimate: isAccelerateImages
+        ? screenSizeHistory.current.width + 400
+        : animationViewport.horizontalMoveValue,
       z: 2,
       blur: 0.4,
       parallax: 0.55,
@@ -328,8 +428,8 @@ const CH1_Loader2 = () => {
       speed: defaultSpeed,
       duration: isAccelerateImages ? 1 : 12,
       xAnimate: isAccelerateImages
-        ? window.screen.width + 400
-        : window.innerWidth + 100,
+        ?  animationViewport.horizontalMoveValue + 400
+        : animationViewport.horizontalMoveValue,
       delay: isAccelerateImages ? 0.41 : 4.1,
       scale: 1,
       z: 1,
@@ -340,9 +440,12 @@ const CH1_Loader2 = () => {
     },
   ];
 
-  const images1 = images.slice(0, 3);
-  const images2 = images.slice(3);
-  const afterburnerImages = images2;
+  const addSlideType = (slides: Slide[], type: SlideType): Slide[] =>
+    slides.map((slide) => ({ ...slide, type }));
+
+  const images1 = addSlideType(images.slice(0, 3), "images1");
+  const images2 = addSlideType(images.slice(3), "images2");
+  const afterburnerImages = addSlideType(images.slice(3), "afterburner");
   return (
     <motion.div
       animate={{ opacity: isOpeningSequence ? 0 : 1 }}
@@ -351,14 +454,12 @@ const CH1_Loader2 = () => {
         ease: "easeInOut",
         delay: isOpeningSequence ? 2 : 0,
       }}
-
       onClick={() => {
         if (isCanUserSkipAnimation.letUserSkip) {
           console.log("User clicked to skip animation");
           setIsAccelerateImages(true);
         }
       }}
-
       className="relative h-screen w-screen bg-white flex items-center overflow-hidden"
     >
       <motion.div
@@ -397,16 +498,16 @@ const CH1_Loader2 = () => {
 
       <div className="bg-red-400">{String(isImageSequence)}</div>
       {images1.map((item) => (
-        <MotionMover key={`images1-${item.id}`} slide={item} />
+        <MotionMover key={`${item.type}-${item.id}`} slide={item} />
       ))}
       {renderStage >= 1 &&
         images2.map((item) => (
-          <MotionMover key={`images2-${item.id}`} slide={item} />
+          <MotionMover key={`${item.type}-${item.id}`} slide={item} />
         ))}
 
       {renderStage >= 2 &&
         afterburnerImages.map((item) => (
-          <MotionMover key={`afterburnerImages-${item.id}`} slide={item} />
+          <MotionMover key={`${item.type}-${item.id}`} slide={item} />
         ))}
 
       {isOpeningSequence && (

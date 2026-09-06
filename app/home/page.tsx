@@ -23,22 +23,22 @@ export default function HomePage() {
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!isUnloadLoader) return;
-    const timer = setTimeout(() => {
-      scrollContainerRef.current?.scrollBy({
-        top: window.innerHeight / 3.1,
-        behavior: "smooth",
-      });
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [isUnloadLoader]);
+  // useEffect(() => {
+  //   if (!isUnloadLoader) return;
+  //   const timer = setTimeout(() => {
+  //     scrollContainerRef.current?.scrollBy({
+  //       top: window.innerHeight / 3.1,
+  //       behavior: "smooth",
+  //     });
+  //   }, 500);
+  //   return () => clearTimeout(timer);
+  // }, [isUnloadLoader]);
 
   return (
     <CH4FloorPlanProvider>
       {!isUnloadLoader && (
         <div className=" relative bg-red-500">
-          <div className="absolute z-50 w-full h-full">
+          <div className="absolute z-200 w-full h-full">
             <CH1_Loader2 />
           </div>
         </div>
@@ -56,7 +56,7 @@ export default function HomePage() {
 
         {isGalleryDisplayScreenActive && (
           <>
-            <section data-section="CH1" className="h-[1200px] snap-start ">
+            <section data-section="CH1" className="snap-start ">
               <CH1_page />
             </section>
 
