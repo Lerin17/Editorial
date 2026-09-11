@@ -56,7 +56,9 @@ export default function HomePage() {
 
         {isGalleryDisplayScreenActive && (
           <>
-            <section data-section="CH1" className="snap-start ">
+
+          <section className="relative h-full snap-start">
+           <section data-section="CH1" className="absolute top-0 left-0 w-full h-full z-10">
               <CH1_page />
             </section>
 
@@ -64,9 +66,11 @@ export default function HomePage() {
               <CH1_page />
             </section> */}
 
-            <section data-section="CH2" className="h-screen snap-start">
+            <section data-section="CH2" className="absolute top-0 left-0 w-full h-full z-0">
               <CH2_page />
             </section>
+          </section>
+           
 
             <section
               data-section="CH3"

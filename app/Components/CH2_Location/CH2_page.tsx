@@ -237,7 +237,7 @@ const CH2_page: React.FC = () => {
         </div>
 
         <div className="absolute z-[20]">
-          <LoaderCircle />
+          {/* <LoaderCircle /> */}
         </div>
 
         {/* <div className="text-black font-archivo font-light  absolute top-32 left-3 text-[150px] z-20">

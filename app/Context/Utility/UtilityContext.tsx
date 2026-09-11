@@ -57,6 +57,7 @@ export type UtilityContextValue = {
   getNextRoute: (currentPath: string, routes: string[]) => string | null;
   isUnloadLoader: boolean;
   setIsUnloadLoader: Dispatch<SetStateAction<boolean>>;
+  isPhone: boolean;
 };
 
 type UtilityProviderProps = {
@@ -115,6 +116,29 @@ export function getNextRoute(
   return index >= 0 && index < routes.length - 1 ? routes[index + 1] : null;
 }
 
+// user-agent/touch based phone detection, never viewport size (which can be resized on desktop)
+export function detectIsPhone(): boolean {
+  if (typeof navigator === "undefined") return false;
+
+  const uaData = (navigator as { userAgentData?: { mobile?: boolean } })
+    .userAgentData;
+
+  if (uaData && typeof uaData.mobile === "boolean") {
+    return uaData.mobile;
+  }
+
+  const userAgent = navigator.userAgent || "";
+  const isMobileUserAgent =
+    /Android.*Mobile|iPhone|iPod|Windows Phone|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent,
+    );
+  const isCoarsePointer =
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(pointer: coarse)").matches;
+
+  return isMobileUserAgent && !!isCoarsePointer;
+}
+
 export function UtilityProvider({
   children,
   routes = [],
@@ -148,6 +172,7 @@ export function UtilityProvider({
     useState(true);
   const [isUnloadLoader, setIsUnloadLoader] = useState(false);
   const [isReveal, setisReveal] = useState();
+  const [isPhone] = useState<boolean>(() => detectIsPhone());
   const pathname = usePathname();
   const isScrollLockedRef = useRef(isScrollLocked);
   const virtualScrollDistanceRef = useRef(virtualScrollDistance);
@@ -313,24 +338,24 @@ export function UtilityProvider({
     };
   }, []);
 
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setIsCanUserSkipAnimation((previousState) => {
-        if (previousState.letUserSkip) {
-          return previousState;
-        }
+  // useEffect(() => {
+  //   const interval = window.setInterval(() => {
+  //     setIsCanUserSkipAnimation((previousState) => {
+  //       if (previousState.letUserSkip) {
+  //         return previousState;
+  //       }
 
-        const nextCount = previousState.count + 1;
+  //       const nextCount = previousState.count + 1;
 
-        return {
-          count: nextCount,
-          letUserSkip: nextCount >= 4,
-        };
-      });
-    }, 1000);
+  //       return {
+  //         count: nextCount,
+  //         letUserSkip: nextCount >= 4,
+  //       };
+  //     });
+  //   }, 500);
 
-    return () => window.clearInterval(interval);
-  }, []);
+  //   return () => window.clearInterval(interval);
+  // }, []);
 
   const nextRoute = useMemo(
     () => getNextRoute(pathname, routes),
@@ -355,6 +380,7 @@ export function UtilityProvider({
       getNextRoute,
       isUnloadLoader,
       setIsUnloadLoader,
+      isPhone,
     }),
     [
       currentSection,
@@ -368,6 +394,7 @@ export function UtilityProvider({
       nextRoute,
       isUnloadLoader,
       screenSizeHistory,
+      isPhone,
     ],
   );
 

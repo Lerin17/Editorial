@@ -15,6 +15,7 @@ type Slide = {
   id: number;
   type?: SlideType;
   src: any;
+  srcName: string;
 
   lane: "foreground" | "mid" | "background";
   size: "hero" | "large" | "medium" | "small";
@@ -66,12 +67,12 @@ const MotionMover = ({ slide, ...props }: MotionMoverProps) => (
     className="absolute border bg-gray-200"
     style={{
       // width: frameWidth,
-      // // height: frameHeight,
-      // maxWidth: "400px",
-      // maxHeight: "600px",
+      // height: frameHeight,
+      maxWidth: "800px",
+      maxHeight: "600px",
 
-      minWidth: "320px",
-      minHeight: "420px",
+      // minWidth: "320px",
+      // minHeight: "420px",
       zIndex: slide.z + 1,
       filter: `blur(${slide.blur}px)`,
     }}
@@ -106,7 +107,7 @@ const MotionMover = ({ slide, ...props }: MotionMoverProps) => (
       className="pointer-events-none select-none object-contain"
     />
     <div className="text-black flex">
-      {`${slide.type ?? "unassigned"}-${slide.id}`}
+      {`${slide.type ?? "unassigned"}-${slide.srcName}`}
       <span className="ml-2">{slide.type}</span>
     </div>
   </motion.div>
@@ -121,6 +122,8 @@ const CH1_Loader2 = () => {
     isCanUserSkipAnimation,
     isOpeningSequence,
     setIsOpeningSequence,
+    isUnloadLoader,
+    isPhone,
   } = useUtilityContext();
   const [isImageSequence, setIsImageSequence] = React.useState(0);
   const [isBeginFadeIn, setIsBeginFadeIn] = React.useState(false);
@@ -155,8 +158,8 @@ const CH1_Loader2 = () => {
 
       let renderStage2Timeout = 6;
 
-      renderStage1Timeout = isAccelerateImages ? 1 : 1;
-      renderStage2Timeout = isAccelerateImages ? 1.6 : 6;
+      renderStage1Timeout = 1;
+      renderStage2Timeout =  6;
 
       setIsImageSequence((prev) => {
         const next = prev + 1;
@@ -172,7 +175,7 @@ const CH1_Loader2 = () => {
 
         return next;
       });
-    }, 1000);
+    }, 500);
 
     return () => window.clearInterval(timer);
   }, [renderStage]);
@@ -185,8 +188,50 @@ const CH1_Loader2 = () => {
     setDefaultSpeed(isAccelerateImages ? ACCELERATE_SPEED : BASE_SPEED);
   }, [isAccelerateImages]);
 
+
+
+
+  // for 2x acceleration of 3 entries
+  const [scrollLog, setScrollLog] = React.useState<
+    { scrollNumber: number; scrollValue: number }[]
+  >([]);
+
+  const hasScrolled = (scrollNumber: number) =>
+    scrollLog.some((entry) => entry.scrollNumber === scrollNumber);
+
   React.useEffect(() => {
-    if (!isAccelerateImages) {
+    if (isUnloadLoader) return;
+
+    const handleMouseScroll = (event: WheelEvent) => {
+      console.log("mouse scroll");
+
+      // for 2x acceleration of 3 entries
+      setScrollLog((prev) => {
+        if (prev.length >= 6) return prev;
+
+        const next = [
+          ...prev,
+          { scrollNumber: prev.length + 1, scrollValue: event.deltaY },
+        ];
+
+        next.forEach((entry) =>
+          console.log(entry.scrollNumber, entry.scrollValue),
+        );
+
+        return next;
+      });
+    };
+
+    window.addEventListener("wheel", handleMouseScroll);
+
+    return () => window.removeEventListener("wheel", handleMouseScroll);
+  }, [isUnloadLoader]);
+
+
+  React.useEffect(() => {
+
+    // const scrollItem3Value = scrollLog[2].scrollNumber 
+    if (!scrollLog[2]) {
       return;
     }
 
@@ -195,9 +240,13 @@ const CH1_Loader2 = () => {
     }, 2000);
 
     return () => window.clearTimeout(timer);
-  }, [isAccelerateImages, setIsOpeningSequence]);
+  }, [scrollLog, setIsOpeningSequence]);
 
   console.log(defaultSpeed, "defaultSpeed");
+
+  React.useEffect(() => {
+    
+  }, []);
 
   React.useEffect(() => {
     const currentWidth = screenSizeHistory.current.width;
@@ -284,16 +333,17 @@ const CH1_Loader2 = () => {
     {
       id: 1,
       src: image3,
+      srcName: "image3",
 
       // layout
       lane: "foreground",
       size: "hero",
       // start position
-      x: 800,
-      xAnimate: isAccelerateImages
-        ? screenSizeHistory.current.width + 400
+      x: isPhone ? 800 : 800,
+       xAnimate: isAccelerateImages
+        ? animationViewport.horizontalMoveValue + 400
         : animationViewport.horizontalMoveValue,
-      y: -120,
+      y: isPhone ? -120 : -120,
 
       // movement
       opacity: defaultOpacity,
@@ -318,15 +368,16 @@ const CH1_Loader2 = () => {
     {
       id: 2,
       src: image2,
+      srcName: "image2",
 
       lane: "mid",
       size: "medium",
 
-      x: 100,
-      xAnimate: isAccelerateImages
-        ? screenSizeHistory.current.width + 400
+      x: isPhone ? 500 : 500,
+  xAnimate: isAccelerateImages
+        ? animationViewport.horizontalMoveValue + 400
         : animationViewport.horizontalMoveValue,
-      y: -200,
+      y: isPhone ? -200 : -200,
 
       opacity: defaultOpacity,
       speed: defaultSpeed,
@@ -347,12 +398,13 @@ const CH1_Loader2 = () => {
     {
       id: 3,
       src: image5,
+      srcName: "image5",
 
       lane: "background",
       size: "small",
 
-      x: 80,
-      y: 40,
+      x: isPhone ? 80 : 80,
+      y: isPhone ? 40 : 40,
       xAnimate: isAccelerateImages
         ? animationViewport.horizontalMoveValue + 400
         : animationViewport.horizontalMoveValue,
@@ -376,10 +428,11 @@ const CH1_Loader2 = () => {
     {
       id: 4,
       src: planImage2,
+      srcName: "planImage2",
       lane: "foreground",
       size: "small",
-      x: 120,
-      y: 170,
+      x: isPhone ? 120 : 120,
+      y: isPhone ? 170 : 170,
       xAnimate: isAccelerateImages
         ? animationViewport.horizontalMoveValue + 400
         : animationViewport.horizontalMoveValue,
@@ -398,17 +451,18 @@ const CH1_Loader2 = () => {
     {
       id: 5,
       src: image4,
+      srcName: "image4",
       lane: "mid",
       size: "small",
-      x: 70,
-      y: -80,
+      x: isPhone ? 70 : 70,
+      y: isPhone ? -80 : -80,
       opacity: defaultOpacity,
       speed: defaultSpeed,
       duration: isAccelerateImages ? 1 : 10,
       delay: isAccelerateImages ? 0.36 : 3.6,
       scale: 1,
-      xAnimate: isAccelerateImages
-        ? screenSizeHistory.current.width + 400
+     xAnimate: isAccelerateImages
+        ? animationViewport.horizontalMoveValue + 400
         : animationViewport.horizontalMoveValue,
       z: 2,
       blur: 0.4,
@@ -420,10 +474,11 @@ const CH1_Loader2 = () => {
     {
       id: 6,
       src: image2,
+      srcName: "image2",
       lane: "background",
       size: "small",
-      x: -40,
-      y: 60,
+      x: isPhone ? -40 : -40,
+      y: isPhone ? 60 : 60,
       opacity: defaultOpacity,
       speed: defaultSpeed,
       duration: isAccelerateImages ? 1 : 12,
@@ -443,9 +498,192 @@ const CH1_Loader2 = () => {
   const addSlideType = (slides: Slide[], type: SlideType): Slide[] =>
     slides.map((slide) => ({ ...slide, type }));
 
-  const images1 = addSlideType(images.slice(0, 3), "images1");
-  const images2 = addSlideType(images.slice(3), "images2");
-  const afterburnerImages = addSlideType(images.slice(3), "afterburner");
+  const images1 = addSlideType(
+    [
+      {
+        id: 1,
+        src: image3,
+        srcName: "image3",
+        lane: "foreground",
+        size: "hero",
+        x: isPhone ? 800 : 800,
+        xAnimate: hasScrolled(1)
+          ? animationViewport.horizontalMoveValue + 400
+          : animationViewport.horizontalMoveValue,
+        y: isPhone ? -120 : -120,
+        opacity: defaultOpacity,
+        speed: defaultSpeed,
+        duration: hasScrolled(1) ? 1 : 10,
+        delay: hasScrolled(1) ? 0 : 0,
+        scale: 0.6,
+        z: 3,
+        blur: 0,
+        parallax: 1.8,
+        imageWidth: 320,
+        imageHeight: 420,
+      },
+    ],
+    "images1",
+  );
+
+  const images2 = addSlideType(
+    [
+        {
+      id: 2,
+      src: image5,
+      srcName: "image5",
+
+      lane: "background",
+      size: "small",
+
+      x: isPhone ? 80 : 80,
+      y: isPhone ? 20 : 20,
+      xAnimate: hasScrolled(2)
+        ? animationViewport.horizontalMoveValue + 400
+        : animationViewport.horizontalMoveValue,
+
+      opacity: [0, 1, 1, 1, 1, 1, 1],
+      speed: defaultSpeed,
+      duration: hasScrolled(2) ? 1 : 11,
+      delay: hasScrolled(2) ? 0.15 : 0.2,
+
+      scale: 0.8,
+      // rotation: -1,
+
+      z: 1,
+      blur: 0,
+
+      parallax: 0.6,
+      imageWidth: 824,
+      imageHeight: 450,
+    },
+       {
+      id: 3,
+      src: image2,
+      srcName: "image2",
+
+      lane: "mid",
+      size: "medium",
+
+      x: isPhone ? 280 : 280,
+  xAnimate: hasScrolled(2)
+        ? animationViewport.horizontalMoveValue + 400
+        : animationViewport.horizontalMoveValue,
+      y: isPhone ? -240 : -240,
+
+      opacity: defaultOpacity,
+      speed: defaultSpeed,
+      duration: hasScrolled(2) ? 1 : 13,
+      delay: hasScrolled(2) ? 0.16 : 1.4,
+
+      scale: 0.5,
+      // rotation: 2,
+
+      z: 2,
+      blur: 0.3,
+
+      parallax: 1,
+      imageWidth: 280,
+      imageHeight: 360,
+    },
+    
+    ],
+    "images2",
+  );
+
+  const afterburnerImages = addSlideType(
+    [
+      {
+        id: 3,
+        src: image5,
+        srcName: "image5",
+        lane: "background",
+        size: "small",
+        x: isPhone ? 80 : 80,
+        y: isPhone ?-40 : -40,
+        xAnimate: hasScrolled(3)
+          ? animationViewport.horizontalMoveValue + 400
+          : animationViewport.horizontalMoveValue,
+        opacity: [0, 1, 1, 1, 1, 1, 1],
+        speed: defaultSpeed,
+        duration: hasScrolled(3) ? 1 : 11,
+        delay: hasScrolled(3) ? 0.15 : 0.7,
+        scale: 0.8,
+        z: 1,
+        blur: 0,
+        parallax: 0.6,
+        imageWidth: 454,
+        imageHeight: 820,
+      },
+      {
+        id: 4,
+        src: planImage2,
+        srcName: "planImage2",
+        lane: "foreground",
+        size: "small",
+        x: isPhone ? 120 : 120,
+        y: isPhone ? -240 : -240,
+        xAnimate: hasScrolled(3)
+          ? animationViewport.horizontalMoveValue + 400
+          : animationViewport.horizontalMoveValue,
+        opacity: defaultOpacity,
+        speed: defaultSpeed,
+        duration: hasScrolled(3) ? 1 : 12,
+        delay: hasScrolled(3) ? 0.17 : 3.9,
+        scale: 0.5,
+        z: 0,
+        blur: 0,
+        parallax: 0.7,
+        imageWidth: 400,
+        imageHeight: 680,
+      },
+      {
+        id: 5,
+        src: image4,
+        srcName: "image4",
+        lane: "mid",
+        size: "small",
+        x: isPhone ? 70 : 70,
+        y: isPhone ? 0 : 0,
+        opacity: defaultOpacity,
+        speed: defaultSpeed,
+        duration: hasScrolled(3) ? 1 : 10,
+        delay: hasScrolled(3) ? 0.36 : 2.5,
+        scale: 1,
+        xAnimate: hasScrolled(3)
+          ? animationViewport.horizontalMoveValue + 400
+          : animationViewport.horizontalMoveValue,
+        z: 2,
+        blur: 0.4,
+        parallax: 0.55,
+        imageWidth: 400,
+        imageHeight: 520,
+      },
+      {
+        id: 6,
+        src: image2,
+        srcName: "image2",
+        lane: "background",
+        size: "small",
+        x: isPhone ? -40 : -40,
+        y: isPhone ? 60 : 60,
+        opacity: defaultOpacity,
+        speed: defaultSpeed,
+        duration: hasScrolled(3) ? 1 : 12,
+        xAnimate: hasScrolled(3)
+          ? animationViewport.horizontalMoveValue + 400
+          : animationViewport.horizontalMoveValue,
+        delay: hasScrolled(3) ? 0.41 :3.6,
+        scale: 1,
+        z: 1,
+        blur: 0.6,
+        parallax: 0.45,
+        imageWidth: 110,
+        imageHeight: 148,
+      },
+    ],
+    "afterburner",
+  );
   return (
     <motion.div
       animate={{ opacity: isOpeningSequence ? 0 : 1 }}
@@ -484,6 +722,7 @@ const CH1_Loader2 = () => {
       <div className="absolute  inset-0 z-0 flex items-center justify-center pointer-events-none">
         <motion.div
           animate={{}}
+
           onClick={() => {
             if (isCanUserSkipAnimation.letUserSkip) {
               console.log("User clicked to skip animation");
