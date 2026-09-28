@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image, { type StaticImageData } from "next/image";
 import siteImageOne from "../../../public/img/site_4.jpg";
 import siteImageTwo from "../../../public/img/siteplan_5.png";
-import { useUtilityContext } from "../../Context/Utility";
 import Viewer from "./ActivityMap/Activity";
 
 type CarouselSlide =
@@ -47,12 +46,6 @@ const carouselSlides: CarouselSlide[] = [
 ];
 
 const CH3_page: React.FC = () => {
-  const { screenSize } = useUtilityContext();
-  const { isSmall, isMedium } = screenSize;
-
-  const frameWidth = isSmall ? "100vw" : isMedium ? "92vw" : "1080px";
-  const frameHeight = isSmall ? "72vh" : isMedium ? "80vh" : "85vh";
-  const frameMaxHeight = isSmall ? "460px" : isMedium ? "620px" : "920px";
   const [activeSlide, setActiveSlide] = useState(0);
 
   return (
@@ -60,17 +53,12 @@ const CH3_page: React.FC = () => {
       className="bg-white"
       style={{ minHeight: "100vh", backgroundColor: "#ffffff" }}
     >
-      <main className="flex min-h-screen items-center justify-center px-4 py-6">
+      <main className="flex min-h-screen items-center justify-center">
         <motion.div
-          className="relative overflow-hidden rounded-2xl bg-white shadow-[0_20px_60px_rgba(0,0,0,0.08)]"
+          className="relative overflow-hidden bg-white"
           style={{
-            width: frameWidth,
-            height: frameHeight,
-            maxWidth: "1080px",
-            maxHeight: frameMaxHeight,
-            minWidth: "280px",
-            minHeight: "320px",
-            margin: "0 auto",
+            width: "100vw",
+            height: "100vh",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -95,7 +83,7 @@ const CH3_page: React.FC = () => {
                     src={carouselSlides[activeSlide].src}
                     alt={carouselSlides[activeSlide].alt}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1080px"
+                    sizes="(max-height: 768px) 100vw, (max-width: 1500px) 90vw, 1080px"
                     style={{ objectFit: "contain", objectPosition: "center" }}
                     priority
                   />

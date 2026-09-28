@@ -1,0 +1,18 @@
+Scene hierarchy
+- Scene [Group]
+  - Cube [Mesh] min: -1, -1, -1 max: 1, 1, 1
+  - Plane [Mesh] min: -1000, 0, -1000 max: 1000, 0, 1000
+  - rootNode [Object3D]
+    - Floor_Floors_<428885_Grass< [Mesh] min: -301.07681590758284, 0.07497066654379655, -210.6529763851151 max: -135.1825677635511, 0.07507716361993103, 140.8848486389233
+    - Floor_Floors_<434200_Road< [Mesh] min: -379.8646961293666, 0.07496709100370308, -222.45553128491832 max: 366.24634805273354, 0.07510180449518178, 222.22229006691373
+    - Toposolid_Toposolid_<392970_Generic_-_1000mm< [Mesh] min: -301.2941421798, -0.000029241927884768315, -210.3301681347657 max: 376.8646767972464, 0.00010183383735204443, 222.33982711027534
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
+  - AxesHelper [AxesHelper]
