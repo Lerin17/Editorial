@@ -6,7 +6,12 @@ import { Canvas, useFrame, useThree,    } from "@react-three/fiber";
 import { OrbitControls, useGLTF, useProgress, Clone, useTexture } from "@react-three/drei";
 import { MeshoptDecoder } from "meshoptimizer";
 import { DRACOLoader, OrbitControls as OrbitControlsImpl } from "three-stdlib";
-import tex1 from '../../../../public/img/texture/tex3.png'
+import tex1 from '../../../../public/img/texture/grass_tex1.jpg'
+import tex2 from '../../../../public/img/texture/Asphalt_tex1.jpg'
+import tex3 from '../../../../public/img/texture/Topo_tex1.jpg'
+import tex4 from '../../../../public/img/texture/area_tex_1.jpg'
+import tex5 from '../../../../public/img/texture/area_tex_2.jpg'
+import textroadmask from '../../../../public/img/texture/area_tex_3_road_mask_5x.jpg'
 
 type FrameData = {
   center: THREE.Vector3;
@@ -43,8 +48,39 @@ type RaycastPoint = {
   z: number;
 };
 
+type RoadClass = "SMALL" | "MEDIUM" | "LARGE";
+type RoadPosition = [number, number];
+type RoadLinearRing = RoadPosition[];
+type RoadPolygonCoordinates = RoadLinearRing[];
+
+type RoadGeoJSONGeometry =
+  | { type: "Polygon"; coordinates: RoadPolygonCoordinates }
+  | { type: "MultiPolygon"; coordinates: RoadPolygonCoordinates[] };
+
+type RoadGeoJSONFeature = {
+  type: "Feature";
+  geometry: RoadGeoJSONGeometry;
+  properties: {
+    road_class: RoadClass;
+    geometry_width_px: number;
+  };
+};
+
+type RoadGeoJSONCollection = {
+  type: "FeatureCollection";
+  features: RoadGeoJSONFeature[];
+};
+
 // Percentage of the full rotation/zoom range still available while the view is locked.
 const LOCK_RANGE_PERCENT = 10;
+const ROAD_PLANE_WIDTH = 3228;
+const ROAD_PLANE_HEIGHT = 2249;
+const ROAD_CLASS_COLORS: Record<RoadClass, string> = {
+  SMALL: "#46c878",
+  MEDIUM: "#f4b942",
+  LARGE: "#4678e8",
+};
+const ROAD_GEOJSON_URL = "/road_network.geojson";
 
 // localStorage key used to persist user-updated camera presets across server restarts.
 const CAMERA_PRESETS_STORAGE_KEY = "ch3-camera-presets";
@@ -188,6 +224,190 @@ function extendWithDraco(loader: {
   loader.setMeshoptDecoder(MeshoptDecoder);
 }
 
+function appendRoadRing(
+  path: THREE.Path,
+  ring: RoadLinearRing,
+  mapPosition: (position: RoadPosition) => THREE.Vector2,
+) {
+  const isClosed =
+    ring.length > 1 &&
+    ring[0][0] === ring[ring.length - 1][0] &&
+    ring[0][1] === ring[ring.length - 1][1];
+  const points = isClosed ? ring.slice(0, -1) : ring;
+  if (points.length < 3) {
+    return false;
+  }
+
+  const firstPoint = mapPosition(points[0]);
+  path.moveTo(firstPoint.x, firstPoint.y);
+  for (const coordinate of points.slice(1)) {
+    const point = mapPosition(coordinate);
+    path.lineTo(point.x, point.y);
+  }
+  path.closePath();
+  return true;
+}
+
+function clipTriangleToPlane(points: THREE.Vector2[]) {
+  let clipped = points;
+  const boundaries = [
+    { axis: "x" as const, value: 0, keepGreater: true },
+    { axis: "x" as const, value: 1, keepGreater: false },
+    { axis: "y" as const, value: 0, keepGreater: true },
+    { axis: "y" as const, value: 1, keepGreater: false },
+  ];
+
+  for (const { axis, value, keepGreater } of boundaries) {
+    const input = clipped;
+    clipped = [];
+    if (input.length === 0) {
+      break;
+    }
+
+    const coordinate = (point: THREE.Vector2) => point[axis];
+    const inside = (point: THREE.Vector2) =>
+      keepGreater
+        ? coordinate(point) >= value
+        : coordinate(point) <= value;
+    let previous = input[input.length - 1];
+    for (const current of input) {
+      const previousInside = inside(previous);
+      const currentInside = inside(current);
+      if (previousInside !== currentInside) {
+        const delta = coordinate(current) - coordinate(previous);
+        const amount = delta === 0 ? 0 : (value - coordinate(previous)) / delta;
+        clipped.push(previous.clone().lerp(current, amount));
+      }
+      if (currentInside) {
+        clipped.push(current);
+      }
+      previous = current;
+    }
+  }
+
+  return clipped;
+}
+
+function createRoadClassGeometry(
+  feature: RoadGeoJSONFeature,
+  imageWidth: number,
+  imageHeight: number,
+  inverseTextureMatrix: THREE.Matrix3,
+) {
+  const polygons =
+    feature.geometry.type === "Polygon"
+      ? [feature.geometry.coordinates]
+      : feature.geometry.coordinates;
+  const textureMatrix = inverseTextureMatrix.clone().invert();
+  const planeCorners = [
+    new THREE.Vector2(0, 0),
+    new THREE.Vector2(1, 0),
+    new THREE.Vector2(1, 1),
+    new THREE.Vector2(0, 1),
+  ].map((corner) => corner.applyMatrix3(textureMatrix));
+  const textureMin = new THREE.Vector2(
+    Math.min(...planeCorners.map((corner) => corner.x)),
+    Math.min(...planeCorners.map((corner) => corner.y)),
+  );
+  const textureMax = new THREE.Vector2(
+    Math.max(...planeCorners.map((corner) => corner.x)),
+    Math.max(...planeCorners.map((corner) => corner.y)),
+  );
+  const positions: number[] = [];
+
+  for (const polygon of polygons) {
+    const [exterior, ...interiors] = polygon;
+    if (!exterior) {
+      continue;
+    }
+
+    const allRings = [exterior, ...interiors];
+    const sourcePoints = allRings.flatMap((ring) =>
+      ring.map(([imageX, imageY]) =>
+        new THREE.Vector2(imageX / imageWidth, 1 - imageY / imageHeight),
+      ),
+    );
+    const sourceMin = new THREE.Vector2(
+      Math.min(...sourcePoints.map((point) => point.x)),
+      Math.min(...sourcePoints.map((point) => point.y)),
+    );
+    const sourceMax = new THREE.Vector2(
+      Math.max(...sourcePoints.map((point) => point.x)),
+      Math.max(...sourcePoints.map((point) => point.y)),
+    );
+    const wrapXStart = Math.ceil(textureMin.x - sourceMax.x - 1e-9);
+    const wrapXEnd = Math.floor(textureMax.x - sourceMin.x + 1e-9);
+    const wrapYStart = Math.ceil(textureMin.y - sourceMax.y - 1e-9);
+    const wrapYEnd = Math.floor(textureMax.y - sourceMin.y + 1e-9);
+
+    for (let wrapX = wrapXStart; wrapX <= wrapXEnd; wrapX += 1) {
+      for (let wrapY = wrapYStart; wrapY <= wrapYEnd; wrapY += 1) {
+        const mapPosition = ([imageX, imageY]: RoadPosition) =>
+          new THREE.Vector2(
+            imageX / imageWidth + wrapX,
+            1 - imageY / imageHeight + wrapY,
+          ).applyMatrix3(inverseTextureMatrix);
+        const shape = new THREE.Shape();
+        if (!appendRoadRing(shape, exterior, mapPosition)) {
+          continue;
+        }
+        for (const interior of interiors) {
+          const hole = new THREE.Path();
+          if (appendRoadRing(hole, interior, mapPosition)) {
+            shape.holes.push(hole);
+          }
+        }
+
+        const sourceGeometry = new THREE.ShapeGeometry(shape);
+        const sourcePositions = sourceGeometry.getAttribute("position");
+        const sourceIndices = sourceGeometry.getIndex();
+        const triangleCount = sourceIndices
+          ? sourceIndices.count / 3
+          : sourcePositions.count / 3;
+
+        for (let triangle = 0; triangle < triangleCount; triangle += 1) {
+          const trianglePoints = [0, 1, 2].map((vertex) => {
+            const positionIndex = sourceIndices
+              ? sourceIndices.getX(triangle * 3 + vertex)
+              : triangle * 3 + vertex;
+            return new THREE.Vector2(
+              sourcePositions.getX(positionIndex),
+              sourcePositions.getY(positionIndex),
+            );
+          });
+          const clippedTriangle = clipTriangleToPlane(trianglePoints);
+          for (let vertex = 1; vertex < clippedTriangle.length - 1; vertex += 1) {
+            for (const point of [
+              clippedTriangle[0],
+              clippedTriangle[vertex],
+              clippedTriangle[vertex + 1],
+            ]) {
+              positions.push(
+                (point.x - 0.5) * ROAD_PLANE_WIDTH,
+                (point.y - 0.5) * ROAD_PLANE_HEIGHT,
+                0,
+              );
+            }
+          }
+        }
+        sourceGeometry.dispose();
+      }
+    }
+  }
+
+  if (positions.length === 0) {
+    return null;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(positions, 3),
+  );
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 // USE ANY FOR TYPING - FIX LATER
 const HouseModel = ({positions}: { positions: any }) => {
 const { scene } = useGLTF("/models/Genesis6.glb", true, true, extendWithDraco);
@@ -318,12 +538,20 @@ function addPlanarUVs(geometry: THREE.BufferGeometry) {
 function ExodusParts({
   onFrameData,
   position,
+  planeTextureOffset,
+  planeTextureRotation,
+  geometryTextureOffset,
+  geometryTextureRotation,
 }: {
   onFrameData: (frameData: FrameData) => void;
   position: [number, number, number];
+  planeTextureOffset: [number, number];
+  planeTextureRotation: number;
+  geometryTextureOffset: [number, number];
+  geometryTextureRotation: number;
 }) {
   const { scene, nodes } = useGLTF(
-    "/models/Exodus.glb",
+    "/models/Exodus1.glb",
     true,
     true,
     extendWithDraco,
@@ -333,8 +561,37 @@ function ExodusParts({
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(32, 68);
+    texture.repeat.set(17, 17);
   });
+
+  const noisyGrassTexture = React.useMemo(() => {
+  const image = grassTexture.image as HTMLImageElement;
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+
+  const context = canvas.getContext("2d");
+  if (!context) return grassTexture;
+
+  context.drawImage(image, 0, 0);
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+
+  for (let i = 0; i < pixels.data.length; i += 4) {
+    const noise = (Math.random() * 2 - 1) * 12; // noise strength
+    pixels.data[i] = Math.max(0, Math.min(255, pixels.data[i] + noise));
+    pixels.data[i + 1] = Math.max(0, Math.min(255, pixels.data[i + 1] + noise));
+    pixels.data[i + 2] = Math.max(0, Math.min(255, pixels.data[i + 2] + noise));
+  }
+
+  context.putImageData(pixels, 0, 0);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.copy(grassTexture.repeat);
+  return texture;
+}, [grassTexture]);
 
   const textures = [
 
@@ -342,6 +599,31 @@ function ExodusParts({
 
   console.log(nodes, 'nodes')
   const [parts, setParts] = React.useState<ExtractedMeshPart[]>([]);
+  const [roadGeometryCollection, setRoadGeometryCollection] =
+    React.useState<RoadGeoJSONCollection | null>(null);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    fetch(ROAD_GEOJSON_URL)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Road geometry request failed: ${response.status}`);
+        }
+        return response.json() as Promise<RoadGeoJSONCollection>;
+      })
+      .then((collection) => {
+        if (isMounted) {
+          setRoadGeometryCollection(collection);
+        }
+      })
+      .catch((error: unknown) => {
+        console.error("[Activity] failed to load classified road geometry", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   React.useEffect(() => {
     // The GLTF scene is not rendered, so update its world matrices before extracting transforms.
@@ -363,7 +645,7 @@ function ExodusParts({
 
       return [{
         name: key,
-        geometry: key === "grass" ? addPlanarUVs(node.geometry) : node.geometry,
+        geometry: key === "grass" || key === "road" || key === "toposolid" || key === "plane" ? addPlanarUVs(node.geometry) : node.geometry,
         material: node.material,
         position: [worldPosition.x, worldPosition.y, worldPosition.z],
         quaternion: [
@@ -387,12 +669,163 @@ function ExodusParts({
     });
   }, [nodes, onFrameData, scene]);
 
-  const partFilter = parts.filter(item => item.name !== 'grass')
+  const partFilter = parts.filter(item => item.name !== 'grass' && item.name !== 'road' && item.name !== 'toposolid' && item.name !== 'plane' )
 
   const grassMesh = parts.filter(item => item.name == 'grass')
 
+    const roadMesh = parts.filter(item => item.name == 'road')
+
+  const toposolidMesh = parts.filter(item => item.name == 'toposolid')
+
+  const planeMesh = parts.filter(item => item.name == 'plane')
+
+
+  const topoTexture = useTexture(tex3.src, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(10, 10);
+  })
+
+const roadTexture = useTexture(tex2.src, (texture) => {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(50, 50);
+});
+
+const mirroredRoadTexture = React.useMemo(() => {
+  const texture = roadTexture.clone();
+  texture.repeat.x = -Math.abs(roadTexture.repeat.x);
+  texture.offset.x = Math.abs(roadTexture.repeat.x);
+  texture.updateMatrix();
+  return texture;
+}, [roadTexture]);
+
+const planeTexture = useTexture(tex5.src, (texture) => {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(-1, 1);
+});
+
+const areaMaskTexture = useTexture(textroadmask.src, (texture) => {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(-1, 1);
+  texture.center.set(0.5, 0.5);
+  texture.offset.set(1 + geometryTextureOffset[0], geometryTextureOffset[1]);
+  texture.rotation = THREE.MathUtils.degToRad(geometryTextureRotation);
+})
+
+React.useEffect(() => {
+  planeTexture.center.set(0.5, 0.5);
+  planeTexture.offset.set(1 + planeTextureOffset[0], planeTextureOffset[1]);
+  planeTexture.rotation = THREE.MathUtils.degToRad(planeTextureRotation);
+
+  areaMaskTexture.center.set(0.5, 0.5);
+  areaMaskTexture.offset.set(1 + geometryTextureOffset[0], geometryTextureOffset[1]);
+  areaMaskTexture.rotation = THREE.MathUtils.degToRad(geometryTextureRotation);
+
+  planeTexture.updateMatrix();
+  areaMaskTexture.updateMatrix();
+}, [
+  areaMaskTexture,
+  geometryTextureOffset,
+  geometryTextureRotation,
+  planeTexture,
+  planeTextureOffset,
+  planeTextureRotation,
+]);
+
+const roadSurfaces = React.useMemo(() => {
+  const maskImage = areaMaskTexture.image as
+    | { width?: number; height?: number }
+    | undefined;
+  if (
+    !roadGeometryCollection ||
+    !maskImage?.width ||
+    !maskImage.height
+  ) {
+    return [];
+  }
+
+  const inverseTextureMatrix = new THREE.Matrix3()
+    .setUvTransform(
+      1 + geometryTextureOffset[0],
+      geometryTextureOffset[1],
+      -1,
+      1,
+      THREE.MathUtils.degToRad(geometryTextureRotation),
+      0.5,
+      0.5,
+    )
+    .invert();
+
+  return roadGeometryCollection.features.flatMap((feature) => {
+    const geometry = createRoadClassGeometry(
+      feature,
+      maskImage.width as number,
+      maskImage.height as number,
+      inverseTextureMatrix,
+    );
+    return geometry
+      ? [{ roadClass: feature.properties.road_class, geometry }]
+      : [];
+  });
+}, [
+  areaMaskTexture.image,
+  geometryTextureOffset,
+  geometryTextureRotation,
+  roadGeometryCollection,
+]);
+
+React.useEffect(
+  () => () => roadSurfaces.forEach(({ geometry }) => geometry.dispose()),
+  [roadSurfaces],
+);
+
   return (
     <group position={position}>
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 3, 0]}
+        scale={[-1, 1, 1]}
+      >
+        <planeGeometry args={[3228, 2249]} />
+        <meshStandardMaterial
+          map={mirroredRoadTexture}
+          roughness={1}
+          metalness={0}
+          roughnessMap={null}
+          alphaMap={areaMaskTexture}
+          opacity={1}
+          transparent
+          depthWrite={false}
+        />
+      </mesh>
+
+      {roadSurfaces.map(({ roadClass, geometry }) => (
+        <mesh
+          key={roadClass}
+          geometry={geometry}
+          position={[0, 3.08, 0]}
+          rotation={[-Math.PI / 2, 0, 0]}
+          scale={[-1, 1, 1]}
+          renderOrder={2}
+        >
+          <meshBasicMaterial
+            color={ROAD_CLASS_COLORS[roadClass]}
+            side={THREE.DoubleSide}
+            transparent
+            opacity={0.76}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      ))}
+
       {partFilter.map((part) => (
         <mesh
           key={part.name}
@@ -414,10 +847,55 @@ function ExodusParts({
           quaternion={part.quaternion}
           scale={part.scale}
           
-      > <meshStandardMaterial  map={grassTexture}/> </mesh>
+      > <meshStandardMaterial map={noisyGrassTexture}/> </mesh>
       ))
     }
+
+    {
+      toposolidMesh.map((part) => (
+        <mesh
+          key={part.name}
+          geometry={part.geometry}
+          material={part.material}
+          position={part.position}
+          quaternion={part.quaternion}
+          scale={part.scale}
+          
+        ><meshStandardMaterial map={topoTexture}/> </mesh>
+      ))
+    }
+
+    {/* {
+      planeMesh.map((part) => (
+        <mesh
+          key={part.name}
+          geometry={part.geometry}
+          material={part.material}
+          position={part.position}
+          quaternion={part.quaternion}
+          scale={part.scale}
+        >
+          <meshStandardMaterial map={planeTexture} />
+        </mesh>
+      ))
+    } */}
+
      
+     
+        {
+      roadMesh.map((part) => (
+         <mesh
+          key={part.name}
+          geometry={part.geometry}
+          material={part.material}
+          position={part.position}
+          quaternion={part.quaternion}
+          scale={part.scale}
+          
+      > <meshStandardMaterial map={roadTexture}/> </mesh>
+      ))
+    }
+
     </group>
   );
 }
@@ -697,8 +1175,86 @@ function formatRaycastPoint(point: RaycastPoint | null) {
 console.info("[Activity] preloading /models/Dun7.glb");
 // useGLTF.preload("/models/Dun7.glb", true, true, extendWithDraco);
 
+function TextureTransformControls({
+  idPrefix,
+  title,
+  offset,
+  rotation,
+  onOffsetChange,
+  onRotationChange,
+}: {
+  idPrefix: string;
+  title: string;
+  offset: [number, number];
+  rotation: number;
+  onOffsetChange: (axis: 0 | 1, value: number) => void;
+  onRotationChange: (value: number) => void;
+}) {
+  return (
+    <div
+      style={{
+        flex: "0 1 240px",
+        boxSizing: "border-box",
+        width: 240,
+        padding: 12,
+        border: "1px solid rgba(255,255,255,0.35)",
+        background: "rgba(0,0,0,0.65)",
+        color: "#ffffff",
+        fontSize: 11,
+        display: "grid",
+        gap: 8,
+        pointerEvents: "auto",
+      }}
+    >
+      <div style={{ fontWeight: 600 }}>{title}</div>
+      <label htmlFor={`${idPrefix}-offset-u`} style={{ display: "grid", gap: 4 }}>
+        <span>Offset U: {offset[0].toFixed(2)}</span>
+        <input
+          id={`${idPrefix}-offset-u`}
+          type="range"
+          min={-0.5}
+          max={0.5}
+          step={0.01}
+          value={offset[0]}
+          onChange={(event) => onOffsetChange(0, Number(event.target.value))}
+        />
+      </label>
+      <label htmlFor={`${idPrefix}-offset-v`} style={{ display: "grid", gap: 4 }}>
+        <span>Offset V: {offset[1].toFixed(2)}</span>
+        <input
+          id={`${idPrefix}-offset-v`}
+          type="range"
+          min={-0.5}
+          max={0.5}
+          step={0.01}
+          value={offset[1]}
+          onChange={(event) => onOffsetChange(1, Number(event.target.value))}
+        />
+      </label>
+      <label htmlFor={`${idPrefix}-rotation`} style={{ display: "grid", gap: 4 }}>
+        <span>Rotation: {rotation}°</span>
+        <input
+          id={`${idPrefix}-rotation`}
+          type="range"
+          min={-180}
+          max={180}
+          step={1}
+          value={rotation}
+          onChange={(event) => onRotationChange(Number(event.target.value))}
+        />
+      </label>
+    </div>
+  );
+}
+
 export default function Viewer() {
   const [frameData, setFrameData] = React.useState<FrameData | null>(null);
+  const [planeTextureOffset, setPlaneTextureOffset] = React.useState<[number, number]>([0.12, -0.02]);
+  const [planeTextureRotation, setPlaneTextureRotation] = React.useState(-179);
+  const [geometryTextureOffset, setGeometryTextureOffset] = React.useState<[number, number]>([0.06, -0.01
+    
+  ]);
+  const [geometryTextureRotation, setGeometryTextureRotation] = React.useState(0);
   const [locked, setLocked] = React.useState(false);
   const [raycastMode, setRaycastMode] = React.useState(false);
   const [raycastPoint, setRaycastPoint] = React.useState<RaycastPoint | null>(
@@ -1046,6 +1602,44 @@ export default function Viewer() {
           </div>
         ))}
       </div>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 16,
+          left: 16,
+          zIndex: 10,
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 8,
+          maxWidth: "calc(100% - 32px)",
+          pointerEvents: "none",
+        }}
+      >
+        <TextureTransformControls
+          idPrefix="plane-mesh"
+          title="Plane mesh texture"
+          offset={planeTextureOffset}
+          rotation={planeTextureRotation}
+          onOffsetChange={(axis, value) =>
+            setPlaneTextureOffset((current) =>
+              axis === 0 ? [value, current[1]] : [current[0], value],
+            )
+          }
+          onRotationChange={setPlaneTextureRotation}
+        />
+        <TextureTransformControls
+          idPrefix="plane-geometry"
+          title="Road network geometry"
+          offset={geometryTextureOffset}
+          rotation={geometryTextureRotation}
+          onOffsetChange={(axis, value) =>
+            setGeometryTextureOffset((current) =>
+              axis === 0 ? [value, current[1]] : [current[0], value],
+            )
+          }
+          onRotationChange={setGeometryTextureRotation}
+        />
+      </div>
       <Canvas
         camera={{ position: [6, 10, 6], fov: 35 }}
         style={{
@@ -1088,6 +1682,10 @@ export default function Viewer() {
             <ExodusParts
               onFrameData={setFrameData}
               position={[0, 0, 0]}
+              planeTextureOffset={planeTextureOffset}
+              planeTextureRotation={planeTextureRotation}
+              geometryTextureOffset={geometryTextureOffset}
+              geometryTextureRotation={geometryTextureRotation}
             />
             {/* Legacy whole-model rendering is disabled while splitting the GLTF meshes.
             {positions.map((position: any, i) => (
