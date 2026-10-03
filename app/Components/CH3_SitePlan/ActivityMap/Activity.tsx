@@ -490,6 +490,9 @@ const BUILDING_NODE_NAMES = {
   scene: "Scene",
   toposolid: "Toposolid_Toposolid_<392970_Generic_-_1000mm<",
   root: "rootNode",
+  roadSmallCenterline: "Road_0002_SMALL_CENTERLINE",
+  roadMediumCenterline: "Road_0010_MEDIUM_CENTERLINE",
+  roadLargeCenterline: "Road_0654_LARGE_CENTERLINE",
 };
 
 function addPlanarUVs(geometry: THREE.BufferGeometry) {
@@ -551,7 +554,7 @@ function ExodusParts({
   geometryTextureRotation: number;
 }) {
   const { scene, nodes } = useGLTF(
-    "/models/Exodus1.glb",
+    "/models/Exodus.glb",
     true,
     true,
     extendWithDraco,
@@ -597,7 +600,7 @@ function ExodusParts({
 
   ]
 
-  console.log(nodes, 'nodes')
+ 
   const [parts, setParts] = React.useState<ExtractedMeshPart[]>([]);
   const [roadGeometryCollection, setRoadGeometryCollection] =
     React.useState<RoadGeoJSONCollection | null>(null);
@@ -793,7 +796,7 @@ React.useEffect(
         position={[0, 3, 0]}
         scale={[-1, 1, 1]}
       >
-        <planeGeometry args={[3228, 2249]} />
+        {/* <planeGeometry args={[3228, 2249]} />
         <meshStandardMaterial
           map={mirroredRoadTexture}
           roughness={1}
@@ -803,28 +806,10 @@ React.useEffect(
           opacity={1}
           transparent
           depthWrite={false}
-        />
+        /> */}
       </mesh>
 
-      {roadSurfaces.map(({ roadClass, geometry }) => (
-        <mesh
-          key={roadClass}
-          geometry={geometry}
-          position={[0, 3.08, 0]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          scale={[-1, 1, 1]}
-          renderOrder={2}
-        >
-          <meshBasicMaterial
-            color={ROAD_CLASS_COLORS[roadClass]}
-            side={THREE.DoubleSide}
-            transparent
-            opacity={0.76}
-            depthWrite={false}
-            toneMapped={false}
-          />
-        </mesh>
-      ))}
+
 
       {partFilter.map((part) => (
         <mesh
